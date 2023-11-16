@@ -1,6 +1,5 @@
 # Hash Browns
-[![Open Source Starter Files](https://github.com/nrminor/hash-browns/actions/workflows/open-source-starter.yaml/badge.svg)](https://github.com/nrminor/hash-browns/actions/workflows/open-source-starter.yaml)
-
+[![Open Source Starter Files](https://github.com/nrminor/hash-browns/actions/workflows/open-source-starter.yaml/badge.svg)](https://github.com/nrminor/hash-browns/actions/workflows/open-source-starter.yaml) [![Open Source Starter Files](https://github.com/nrminor/hash-browns/actions/workflows/open-source-starter.yaml/badge.svg)](https://github.com/nrminor/hash-browns/actions/workflows/open-source-starter.yaml)
 Metagenomic read classification well done.
 
 ### Overview
