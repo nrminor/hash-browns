@@ -1,0 +1,22 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'config/Dockerfile'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'config/Dockerfile'
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build config/ --tag hash-browns:ci_test_$(date +%s)
