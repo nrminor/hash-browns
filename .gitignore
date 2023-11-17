@@ -162,3 +162,20 @@ cython_debug/
 # MacOS files
 ._*
 .DS_Store
+
+# Input and dev folders
+input/
+data/
+reads/
+fastqs
+seqs/
+sandbox/
+scratch/
+dev/
+
+# nextflow directories and files
+.nextflow/
+work/
+results/
+.nextflow.log*
+*.dot
