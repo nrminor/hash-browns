@@ -16,12 +16,10 @@ workflow {
 	
 	
 	// Workflow steps
-	FETCH_TAXONOMY (
-
-	)
+	FETCH_TAXONOMY ( )
 
     FETCH_NT (
-		FETCH_TAXONOMY.out.cue
+		FETCH_TAXONOMY.out
 	)
 
     SORT_BY_NAME (
@@ -64,8 +62,7 @@ process FETCH_TAXONOMY {
 	storeDir params.taxpath
 
 	output:
-	val "cue", emit: cue
-	path "*", emit: tax_files
+	path "*"
 
 	when:
 	params.download_nt == true || download_only == true
@@ -100,6 +97,8 @@ process FETCH_NT {
 	
 	/* */
 
+	storeDir params.nt_storedir
+
 	input:
 	val cue
 	
@@ -110,8 +109,6 @@ process FETCH_NT {
     params.download_nt == true || download_only == true
 	
 	script:
-	println "Received " + cue.toString() " from taxonomy download."
-	println "Now downloading Nt."
 	"""
 	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
     | gi2taxid.sh -Xmx1g \
