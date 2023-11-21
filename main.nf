@@ -97,7 +97,7 @@ process FETCH_NT {
 	storeDir params.nt_storedir
 
 	input:
-	val cue
+	path tax_files
 	
 	output:
     path "${params.date}_nt.fa.gz"
