@@ -15,8 +15,14 @@ workflow {
         .map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	
 	
-	// Workflow steps 
-    FETCH_NT ()
+	// Workflow steps
+	FETCH_TAXONOMY (
+
+	)
+
+    FETCH_NT (
+		FETCH_TAXONOMY.out.cue
+	)
 
     SORT_BY_NAME (
         FETCH_NT.out
@@ -53,17 +59,59 @@ workflow {
 // PROCESS SPECIFICATION 
 // --------------------------------------------------------------- //
 
+process FETCH_TAXONOMY {
+
+	storeDir params.taxpath
+
+	output:
+	val "cue", emit: cue
+	path "*", emit: tax_files
+
+	when:
+	params.download_nt == true || download_only == true
+
+	script:
+	"""
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_nucl.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.dead_nucl.accession2taxid.gz zl=9 t=4 &
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_prot.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.dead_prot.accession2taxid.gz zl=9 t=6 &
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_wgs.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.dead_wgs.accession2taxid.gz zl=9 t=6 &
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.nucl_gb.accession2taxid.gz zl=9 t=8 &
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_wgs.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.nucl_wgs.accession2taxid.gz zl=9 t=8 &
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/pdb.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.pdb.accession2taxid.gz zl=9 t=4 &
+	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.prot.accession2taxid.gz zl=9 t=8
+
+	wget -nv ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip
+
+	unzip -o taxdmp.zip
+	taxtree.sh names.dmp nodes.dmp merged.dmp tree.taxtree.gz -Xmx16g
+	gitable.sh shrunk.dead_nucl.accession2taxid.gz,shrunk.dead_prot.accession2taxid.gz,shrunk.dead_wgs.accession2taxid.gz,shrunk.nucl_gb.accession2taxid.gz,shrunk.nucl_wgs.accession2taxid.gz,shrunk.pdb.accession2taxid.gz,shrunk.prot.accession2taxid.gz gitable.int1d.gz -Xmx24g
+	analyzeaccession.sh shrunk.*.accession2taxid.gz out=patterns.txt
+	"""
+}
+
 process FETCH_NT {
 	
 	/* */
+
+	input:
+	val cue
 	
 	output:
     path "${params.date}_nt.fa.gz"
 	
 	when:
-    params.download_nt == true
+    params.download_nt == true || download_only == true
 	
 	script:
+	println "Received " + cue.toString() " from taxonomy download."
+	println "Now downloading Nt."
 	"""
 	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
     | gi2taxid.sh -Xmx1g \
@@ -147,6 +195,9 @@ process CLASSIFY_WITH_SKETCHES {
 	
 	output:
 	path "taxa*.sketch"
+
+	when:
+	params.download_only == false
 	
 	script:
 	"""
