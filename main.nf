@@ -11,7 +11,7 @@ workflow {
 	
 	// input channels
     ch_fastqs = Channel
-        .fromPath( "${params.fasq_dir}/**/*.fastq" )
+        .fromPath( "${params.fastq_dir}/**/*.fastq" )
         .map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	
 	
@@ -64,9 +64,6 @@ process FETCH_TAXONOMY {
 	output:
 	path "*"
 
-	when:
-	params.download_nt == true || download_only == true
-
 	script:
 	"""
 	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_nucl.accession2taxid.gz \
@@ -105,9 +102,6 @@ process FETCH_NT {
 	output:
     path "${params.date}_nt.fa.gz"
 	
-	when:
-    params.download_nt == true || download_only == true
-	
 	script:
 	"""
 	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
@@ -127,6 +121,9 @@ process SORT_BY_NAME {
 	
 	output:
 	path "${params.date}_nt_sorted.fa.gz"
+
+	when:
+	params.download_only == false
 	
 	script:
 	"""

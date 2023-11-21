@@ -10,6 +10,10 @@ LABEL maintainer="nrminor@wisc.edu"
 # Set time zone
 ENV TZ America/New_York
 
+# set home
+ENV HOME=/opt
+ENV ~=/opt
+
 # Set environment variables to non-interactive (this prevents some prompts)
 ENV DEBIAN_FRONTEND=non-interactive
 
@@ -18,12 +22,16 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     autoconf \
     automake \
+    gcc \
+    make \
+    cmake \
     libtool \
     pkg-config \ 
     zstd \
     pigz \
     wget \
     curl \
+    git \
     default-jre && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -49,7 +57,8 @@ RUN wget https://github.com/shenwei356/seqkit/releases/download/v2.1.0/seqkit_li
 # Install BBMap
 RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_38.90.tar.gz && \
     tar -xvzf BBMap_38.90.tar.gz && \
-    rm BBMap_38.90.tar.gz
+    rm BBMap_38.90.tar.gz && \
+    mv bbmap /opt
 
 # Set BBMap environment variable
 ENV PATH="/opt/bbmap:${PATH}"
@@ -61,10 +70,22 @@ RUN wget https://github.com/shenwei356/csvtk/releases/download/v0.23.0/csvtk_lin
     mv csvtk /usr/local/bin/ && \
     rm csvtk_linux_amd64.tar.gz
 
+# install Rust
+RUN mkdir -m777 /opt/rust /opt/.cargo
+ENV RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/.cargo PATH=/opt/.cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y && \
+    bash "/opt/.cargo/env"
+
+# Install Sylph
+RUN git clone https://github.com/bluenote-1577/sylph && \
+    cd sylph && \
+    cargo install --path . --root /opt/.cargo
+
 # Install Nextflow
 RUN curl -s https://get.nextflow.io | bash && \
-    chmod +x /scratch/nextflow && \
-    mv /scratch/nextflow /usr/local/bin/nextflow
+    chmod 777 nextflow && \
+    mv nextflow /usr/local/bin/ && \
+    chmod 777 /usr/local/bin/nextflow
 
 # Set default command
 CMD ["bash"]
