@@ -7,7 +7,9 @@ nextflow.enable.dsl = 2
 // WORKFLOW SPECIFICATION
 // --------------------------------------------------------------- //
 workflow {
-	
+
+	assert params.taxpath != "" : "Please set path on your system for storing taxonomy files."
+	assert params.nt_storedir != "" : "Please set path on your system for storing the NCBI nt database."
 	
 	// input channels
     ch_fastqs = Channel
