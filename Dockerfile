@@ -32,7 +32,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     git \
-    default-jre && \
+    default-jre \
+    python3.12 \
+    python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir /dependencies && \
@@ -80,6 +82,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y &&
 RUN git clone https://github.com/bluenote-1577/sylph && \
     cd sylph && \
     cargo install --path . --root /opt/.cargo
+
+# Install Sourmash
+RUN pip install sourmash==4.8.4
 
 # Install Nextflow
 RUN curl -s https://get.nextflow.io | bash && \
