@@ -30,15 +30,22 @@ workflow {
     //     SORT_BY_NAME.out
     // )
 
-    GENERATE_SKETCHES (
+    SKETCH_WITH_BBSKETCH (
         SORT_BY_NAME.out
     )
 
-    CLASSIFY_WITH_SKETCHES (
+    CLASSIFY_WITH_BBSKETCH (
         ch_fastqs,
-        GENERATE_SKETCHES.out.collect()
+        SKETCH_WITH_BBSKETCH.out.collect()
     )
-	
+
+	// SKETCH_WITH_SYLPH ()
+
+	// CLASSIFY_WITH_SYLPH ()
+
+	// SKETCH_WITH_SOURMASH ()
+
+	// CLASSIFY_WITH_SOURMASH ()
 	
 }
 // --------------------------------------------------------------- //
@@ -154,7 +161,7 @@ process SORT_BY_NAME {
 // 	"""
 // }
 
-process GENERATE_SKETCHES {
+process SKETCH_WITH_BBSKETCH {
 	
 	/* */
 	
@@ -176,7 +183,7 @@ process GENERATE_SKETCHES {
 	"""
 }
 
-process CLASSIFY_WITH_SKETCHES {
+process CLASSIFY_WITH_BBSKETCH {
 	
 	/* */
 	
