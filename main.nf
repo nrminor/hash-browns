@@ -107,7 +107,7 @@ process FETCH_NT {
 	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
     | gi2taxid.sh -Xmx1g \
     in=stdin.fa.gz out=${params.date}_nt.fa.gz \
-    pigz=32 unpigz bgzip zl=8 server ow shrinknames maxbadheaders=5000 \
+    pigz=32 unpigz=t bgzip=t preferbgzip=t zl=8 server ow shrinknames maxbadheaders=5000 \
     badheaders=badHeaders.txt taxpath=${params.taxpath}
 	"""
 }
@@ -169,7 +169,7 @@ process GENERATE_SKETCHES {
 	
 	script:
 	"""
-	bbsketch.sh -Xmx31g 
+	bbsketch.sh -Xmx32g 
     in=`realpath ${nt_sorted}` out=taxa#.sketch \
     mode=taxa tree=auto files=31 ow unpigz minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
     # blacklist=blacklist_nt_genus_100.sketch 
