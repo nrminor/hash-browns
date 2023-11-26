@@ -14,13 +14,37 @@ workflow {
         .fromPath( "${params.fastq_dir}/**/*.fastq" )
         .map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	
+	ch_urls = Channel
+		.of( params.urls )
+		.flatten()
+	
 	
 	// Workflow steps
-	FETCH_TAXONOMY ( )
+	FETCH_ACCESSION2TAXID (
+		ch_urls
+	)
 
-    FETCH_NT (
+	FETCH_TAXONOMY (
+		FETCH_ACCESSION2TAXID.out.collect()
+	)
+
+	UNZIP_TAXONOMY (
 		FETCH_TAXONOMY.out
 	)
+
+	CONSTRUCT_TAX_TREE (
+		UNZIP_TAXONOMY.out.collect()
+	)
+
+	CONSTRUCT_GITABLE (
+		FETCH_ACCESSION2TAXID.out.collect()
+	)
+
+	ANALYZE_ACCESSIONS (
+		FETCH_ACCESSION2TAXID.out.collect()
+	)
+
+    FETCH_NT ( )
 
     SORT_BY_NAME (
         FETCH_NT.out
@@ -56,6 +80,22 @@ workflow {
 // --------------------------------------------------------------- //
 // Additional parameters that are derived from parameters set in nextflow.config
 
+// bbsketch results
+params.bbsketch_results = params.results + "/bbsketch"
+params.sorted_nt = params.bbsketch_results + "/sorted_nt"
+params.bbsketches = params.bbsketch_results + "/sketches"
+params.bbsketch_classifications = params.bbsketch_results + "/classifications"
+
+// sylph results
+params.sylph_results = params.results + "/sylph"
+params.sylph_sketches = params.sylph_results + "/sketches"
+params.sylph_classifications = params.sylph_results + "/classifications"
+
+// sourmash results
+params.sourmash_results = params.results + "/sourmash"
+params.sourmash_sketches = params.sourmash_results + "/sketches"
+params.sourmash_classifications = params.sourmash_results + "/classifications"
+
 // --------------------------------------------------------------- //
 
 
@@ -64,37 +104,111 @@ workflow {
 // PROCESS SPECIFICATION 
 // --------------------------------------------------------------- //
 
+process FETCH_ACCESSION2TAXID {
+
+	storeDir params.taxpath
+
+	cpus 8
+
+	input:
+	val url
+
+	output:
+	path "*"
+
+	script:
+	file_name = url.toString().split("/")[-1]
+	"""
+	wget -q -O - ${url} \
+	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.${file_name} zl=9 t=${task.cpus}
+	"""
+
+}
+
 process FETCH_TAXONOMY {
 
 	storeDir params.taxpath
+
+	input:
+	path accesion2taxid_files
 
 	output:
 	path "*"
 
 	script:
 	"""
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_nucl.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.dead_nucl.accession2taxid.gz zl=9 t=4 &
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_prot.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.dead_prot.accession2taxid.gz zl=9 t=6 &
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/dead_wgs.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.dead_wgs.accession2taxid.gz zl=9 t=6 &
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.nucl_gb.accession2taxid.gz zl=9 t=8 &
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/nucl_wgs.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.nucl_wgs.accession2taxid.gz zl=9 t=8 &
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/pdb.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.pdb.accession2taxid.gz zl=9 t=4 &
-	wget -q -O - ftp://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz \
-	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.prot.accession2taxid.gz zl=9 t=8
-
 	wget -nv ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip
+	"""
+}
 
-	unzip -o taxdmp.zip
+process UNZIP_TAXONOMY {
+
+	storeDir params.taxpath
+
+	input:
+	path taxdmp_zip
+
+	output:
+	path "*.dmp"
+
+	script:
+	"""
+	unzip -o ${taxdmp_zip}
+	"""
+
+}
+
+process CONSTRUCT_TAX_TREE {
+
+	storeDir params.taxpath
+
+	memory 16.GB
+
+	input:
+	path taxdmp_files
+
+	output:
+	path "*"
+
+	script:
+	"""
 	taxtree.sh names.dmp nodes.dmp merged.dmp tree.taxtree.gz -Xmx16g
-	gitable.sh shrunk.dead_nucl.accession2taxid.gz,shrunk.dead_prot.accession2taxid.gz,shrunk.dead_wgs.accession2taxid.gz,shrunk.nucl_gb.accession2taxid.gz,shrunk.nucl_wgs.accession2taxid.gz,shrunk.pdb.accession2taxid.gz,shrunk.prot.accession2taxid.gz gitable.int1d.gz -Xmx24g
+	"""
+
+}
+
+process CONSTRUCT_GITABLE {
+
+	storeDir params.taxpath
+
+	input:
+	path shrunk_taxid2accessions
+
+	output:
+	path "gitable.int1d.gz"
+	
+	script:
+	"""
+	gitable.sh shrunk.dead_nucl.accession2taxid.gz,shrunk.dead_prot.accession2taxid.gz,shrunk.dead_wgs.accession2taxid.gz,shrunk.nucl_gb.accession2taxid.gz,shrunk.nucl_wgs.accession2taxid.gz,shrunk.pdb.accession2taxid.gz,shrunk.prot.accession2taxid.gz gitable.int1d.gz
+	"""
+
+}
+
+process ANALYZE_ACCESSIONS {
+
+	storeDir params.taxpath
+
+	input:
+	path shrunk_taxid2accessions
+
+	output:
+	path "patterns.txt"
+
+	script:
+	"""
 	analyzeaccession.sh shrunk.*.accession2taxid.gz out=patterns.txt
 	"""
+
 }
 
 process FETCH_NT {
@@ -102,9 +216,6 @@ process FETCH_NT {
 	/* */
 
 	storeDir params.nt_storedir
-
-	input:
-	path tax_files
 	
 	output:
     path "${params.date}_nt.fa.gz"
@@ -122,6 +233,8 @@ process FETCH_NT {
 process SORT_BY_NAME {
 	
 	/* */
+	
+	publishDir params.sorted_nt, mode: 'copy', overwrite: true
 	
 	input:
 	path nt_fasta
@@ -165,8 +278,7 @@ process SKETCH_WITH_BBSKETCH {
 	
 	/* */
 	
-	tag "${tag}"
-	publishDir params.results, mode: 'copy'
+	publishDir params.bbsketches, mode: 'copy', overwrite: true
 	
 	input:
 	path nt_sorted
@@ -187,8 +299,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	
 	/* */
 	
-	tag "${sample_id}"
-	publishDir params.results, mode: 'copy'
+	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
 	
 	input:
     tuple val(sample_id), path(fastq)
@@ -207,6 +318,38 @@ process CLASSIFY_WITH_BBSKETCH {
     exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus # \
     # blacklist=blacklist_nt_genus_100.sketch
 	"""
+}
+
+process SKETCH_WITH_SYLPH {
+	
+	/* */
+	
+	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
+
+}
+
+process CLASSIFY_WITH_SYLPH {
+	
+	/* */
+	
+	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
+	
+}
+
+process SKETCH_WITH_SOURMASH {
+	
+	/* */
+	
+	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+
+}
+
+process CLASSIFY_WITH_SOURMASH {
+	
+	/* */
+	
+	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
+
 }
 
 // --------------------------------------------------------------- //
