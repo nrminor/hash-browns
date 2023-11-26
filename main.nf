@@ -320,36 +320,36 @@ process CLASSIFY_WITH_BBSKETCH {
 	"""
 }
 
-process SKETCH_WITH_SYLPH {
+// process SKETCH_WITH_SYLPH {
 	
-	/* */
+// 	/* */
 	
-	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
+// 	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
 
-}
+// }
 
-process CLASSIFY_WITH_SYLPH {
+// process CLASSIFY_WITH_SYLPH {
 	
-	/* */
+// 	/* */
 	
-	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
+// 	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
 	
-}
+// }
 
-process SKETCH_WITH_SOURMASH {
+// process SKETCH_WITH_SOURMASH {
 	
-	/* */
+// 	/* */
 	
-	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+// 	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
 
-}
+// }
 
-process CLASSIFY_WITH_SOURMASH {
+// process CLASSIFY_WITH_SOURMASH {
 	
-	/* */
+// 	/* */
 	
-	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
+// 	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
 
-}
+// }
 
 // --------------------------------------------------------------- //
