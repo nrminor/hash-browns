@@ -15,7 +15,7 @@ workflow {
         .map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	
 	ch_urls = Channel
-		.of( params.urls )
+		.of( params.accession2taxid_urls )
 		.flatten()
 	
 	
