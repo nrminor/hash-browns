@@ -220,7 +220,7 @@ process FETCH_NT {
 	storeDir params.nt_storedir
 	
 	output:
-    path "${params.date}_nt.fa.gz"
+    path "nt.fa.gz"
 	
 	script:
 	"""
@@ -237,6 +237,8 @@ process SORT_BY_NAME {
 	/* */
 	
 	publishDir params.sorted_nt, mode: 'copy', overwrite: true
+
+	memory 32.GB
 	
 	input:
 	path nt_fasta
@@ -249,7 +251,7 @@ process SORT_BY_NAME {
 	
 	script:
 	"""
-	sortbyname.sh -Xmx96g \
+	sortbyname.sh -Xmx32g \
     in=`realpath ${nt_fasta}` out=${params.date}_nt_sorted.fa.gz \
     ow taxa tree=auto fastawrap=1023 zl=9 pigz=32 minlen=60 bgzip unbgzip
 	"""
@@ -281,6 +283,8 @@ process SKETCH_WITH_BBSKETCH {
 	/* */
 	
 	publishDir params.bbsketches, mode: 'copy', overwrite: true
+
+	memory 32.GB
 	
 	input:
 	path nt_sorted
