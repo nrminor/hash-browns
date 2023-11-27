@@ -232,8 +232,8 @@ process FETCH_NT {
 process SORT_BY_NAME {
 	
 	/* */
-	
-	publishDir params.sorted_nt, mode: 'copy', overwrite: true
+
+	storeDir params.nt_storedir
 
 	memory 32.GB
 	
@@ -242,9 +242,6 @@ process SORT_BY_NAME {
 	
 	output:
 	path "${params.date}_nt_sorted.fa.gz"
-
-	when:
-	params.download_only == false
 	
 	script:
 	"""
@@ -288,6 +285,9 @@ process SKETCH_WITH_BBSKETCH {
 	
 	output:
 	path "taxa*.sketch"
+
+	when:
+	params.download_only == false
 	
 	script:
 	"""
