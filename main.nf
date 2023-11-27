@@ -33,7 +33,7 @@ workflow {
 	)
 
 	CONSTRUCT_TAX_TREE (
-		UNZIP_TAXONOMY.out.collect()
+		UNZIP_TAXONOMY.out
 	)
 
 	CONSTRUCT_GITABLE (
@@ -114,7 +114,7 @@ process FETCH_ACCESSION2TAXID {
 	val url
 
 	output:
-	path "*"
+	path "shrunk.${file_name}"
 
 	script:
 	file_name = url.toString().split("/")[-1]
@@ -130,7 +130,7 @@ process FETCH_TAXONOMY {
 	storeDir params.taxpath
 
 	output:
-	path "*"
+	path "taxdmp.zip"
 
 	script:
 	"""
@@ -165,7 +165,7 @@ process CONSTRUCT_TAX_TREE {
 	path taxdmp_files
 
 	output:
-	path "*"
+	path "tree.taxtree.gz"
 
 	script:
 	"""
