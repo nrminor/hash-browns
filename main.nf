@@ -26,9 +26,7 @@ workflow {
 		ch_urls
 	)
 
-	FETCH_TAXONOMY (
-		FETCH_ACCESSION2TAXID.out.collect()
-	)
+	FETCH_TAXONOMY ( )
 
 	UNZIP_TAXONOMY (
 		FETCH_TAXONOMY.out
@@ -130,9 +128,6 @@ process FETCH_ACCESSION2TAXID {
 process FETCH_TAXONOMY {
 
 	storeDir params.taxpath
-
-	input:
-	path accesion2taxid_files
 
 	output:
 	path "*"
