@@ -38,9 +38,9 @@ workflow {
 		UNZIP_TAXONOMY.out.collect()
 	)
 
-	// CONSTRUCT_GITABLE (
-	// 	FETCH_ACCESSION2TAXID.out.collect()
-	// )
+	CONSTRUCT_GITABLE (
+		FETCH_ACCESSION2TAXID.out.collect()
+	)
 
 	ANALYZE_ACCESSIONS (
 		FETCH_ACCESSION2TAXID.out.collect()
@@ -145,7 +145,7 @@ process FETCH_TAXONOMY {
 
 process UNZIP_TAXONOMY {
 
-	// storeDir params.taxpath
+	storeDir params.taxpath
 
 	input:
 	path taxdmp_zip
@@ -162,7 +162,7 @@ process UNZIP_TAXONOMY {
 
 process CONSTRUCT_TAX_TREE {
 
-	// storeDir params.taxpath
+	storeDir params.taxpath
 
 	memory 16.GB
 
@@ -181,7 +181,7 @@ process CONSTRUCT_TAX_TREE {
 
 process CONSTRUCT_GITABLE {
 
-	// storeDir params.taxpath
+	storeDir params.taxpath
 
 	input:
 	path shrunk_taxid2accessions
@@ -198,7 +198,7 @@ process CONSTRUCT_GITABLE {
 
 process ANALYZE_ACCESSIONS {
 
-	// storeDir params.taxpath
+	storeDir params.taxpath
 
 	input:
 	path shrunk_taxid2accessions
