@@ -295,7 +295,8 @@ process SKETCH_WITH_BBSKETCH {
 	"""
 	bbsketch.sh -Xmx32g 
     in=`realpath ${nt_sorted}` out=taxa#.sketch \
-    mode=taxa tree="${params.taxpath}/tree.taxtree.gz" files=31 ow unpigz minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
+    mode=taxa tree="${params.taxpath}/tree.taxtree.gz" files=31 ow unpigz \
+	minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
     # blacklist=blacklist_nt_genus_100.sketch 
 	"""
 }
@@ -305,6 +306,8 @@ process CLASSIFY_WITH_BBSKETCH {
 	/* */
 	
 	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
+
+	cpus 3
 	
 	input:
     tuple val(sample_id), path(fastq)
