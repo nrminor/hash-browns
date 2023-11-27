@@ -38,9 +38,9 @@ workflow {
 		UNZIP_TAXONOMY.out.collect()
 	)
 
-	CONSTRUCT_GITABLE (
-		FETCH_ACCESSION2TAXID.out.collect()
-	)
+	// CONSTRUCT_GITABLE (
+	// 	FETCH_ACCESSION2TAXID.out.collect()
+	// )
 
 	ANALYZE_ACCESSIONS (
 		FETCH_ACCESSION2TAXID.out.collect()
@@ -226,7 +226,7 @@ process FETCH_NT {
 	"""
 	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
     | gi2taxid.sh -Xmx1g \
-    in=stdin.fa.gz out=${params.date}_nt.fa.gz \
+    in=stdin.fa.gz out=nt.fa.gz \
     pigz=32 unpigz=t bgzip=t preferbgzip=t zl=8 server ow shrinknames maxbadheaders=5000 \
     badheaders=badHeaders.txt taxpath=${params.taxpath}
 	"""
