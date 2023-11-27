@@ -17,7 +17,7 @@ workflow {
         .map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	
 	ch_urls = Channel
-		.of( params.accession2taxid_urls )
+		.fromList( params.accession2taxid_urls )
 		.flatten()
 	
 	
@@ -110,7 +110,7 @@ process FETCH_ACCESSION2TAXID {
 
 	storeDir params.taxpath
 
-	cpus 8
+	cpus 2
 
 	input:
 	val url
@@ -191,7 +191,9 @@ process CONSTRUCT_GITABLE {
 	
 	script:
 	"""
-	gitable.sh shrunk.dead_nucl.accession2taxid.gz,shrunk.dead_prot.accession2taxid.gz,shrunk.dead_wgs.accession2taxid.gz,shrunk.nucl_gb.accession2taxid.gz,shrunk.nucl_wgs.accession2taxid.gz,shrunk.pdb.accession2taxid.gz,shrunk.prot.accession2taxid.gz gitable.int1d.gz
+	gitable.sh \
+	shrunk.dead_nucl.accession2taxid.gz,shrunk.dead_prot.accession2taxid.gz,shrunk.dead_wgs.accession2taxid.gz,shrunk.nucl_gb.accession2taxid.gz,shrunk.nucl_wgs.accession2taxid.gz,shrunk.pdb.accession2taxid.gz,shrunk.prot.accession2taxid.gz \
+	gitable.int1d.gz
 	"""
 
 }
@@ -312,7 +314,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	each path(nt_sorted)
 	
 	output:
-	path "taxa*.sketch"
+	path "*"
 
 	when:
 	params.download_only == false
