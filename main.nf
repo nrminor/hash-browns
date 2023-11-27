@@ -270,7 +270,7 @@ process SORT_BY_NAME {
 // 	"""
 // 	sketchblacklist.sh -Xmx31g \
 //     in=`realpath ${nt_sorted}` out=blacklist_nt_genus_100.sketch \
-//     prepasses=1 tree=auto taxa taxlevel=genus ow mincount=120 k=32,24 depth taxpath=${params.taxpath}
+//     prepasses=1 tree="${params.taxpath}/tree.taxtree.gz" taxa taxlevel=genus ow mincount=120 k=32,24 depth taxpath=${params.taxpath}
 // 	"""
 // }
 
@@ -295,7 +295,7 @@ process SKETCH_WITH_BBSKETCH {
 	"""
 	bbsketch.sh -Xmx32g 
     in=`realpath ${nt_sorted}` out=taxa#.sketch \
-    mode=taxa tree=auto files=31 ow unpigz minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
+    mode=taxa tree="${params.taxpath}/tree.taxtree.gz" files=31 ow unpigz minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
     # blacklist=blacklist_nt_genus_100.sketch 
 	"""
 }
@@ -319,7 +319,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	script:
 	"""
 	comparesketch.sh \
-    in=`realpath ${fastq}` k=32,24 tree=auto taxa*.sketch \
+    in=`realpath ${fastq}` k=32,24 tree="${params.taxpath}/tree.taxtree.gz" taxa*.sketch \
     exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus # \
     # blacklist=blacklist_nt_genus_100.sketch
 	"""
