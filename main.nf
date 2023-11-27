@@ -47,7 +47,8 @@ workflow {
     FETCH_NT ( )
 
     SORT_BY_NAME (
-        FETCH_NT.out
+        FETCH_NT.out,
+		CONSTRUCT_TAX_TREE.out
     )
 
     // SKETCH_BLACKLIST (
@@ -239,15 +240,16 @@ process SORT_BY_NAME {
 	
 	input:
 	path nt_fasta
+	path taxtree
 	
 	output:
-	path "${params.date}_nt_sorted.fa.gz"
+	path "nt_sorted.fa.gz"
 	
 	script:
 	"""
 	sortbyname.sh -Xmx32g \
-    in=`realpath ${nt_fasta}` out=${params.date}_nt_sorted.fa.gz \
-    ow taxa tree=auto fastawrap=1023 zl=9 pigz=32 minlen=60 bgzip unbgzip
+    in=`realpath ${nt_fasta}` out=nt_sorted.fa.gz \
+    ow taxa tree=`realpath ${taxtree}` fastawrap=1023 zl=9 pigz=32 minlen=60 bgzip unbgzip
 	"""
 }
 
