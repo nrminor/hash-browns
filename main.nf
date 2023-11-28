@@ -130,6 +130,9 @@ process FETCH_ACCESSION2TAXID {
 
 	storeDir params.taxpath
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	cpus 2
 
 	input:
@@ -164,6 +167,9 @@ process UNZIP_TAXONOMY {
 
 	storeDir params.taxpath
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	input:
 	path taxdmp_zip
 
@@ -180,6 +186,9 @@ process UNZIP_TAXONOMY {
 process CONSTRUCT_TAX_TREE {
 
 	storeDir params.taxpath
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
 
 	memory 16.GB
 
@@ -200,6 +209,9 @@ process CONSTRUCT_GITABLE {
 
 	storeDir params.taxpath
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	input:
 	path shrunk_taxid2accessions
 
@@ -219,6 +231,9 @@ process ANALYZE_ACCESSIONS {
 
 	storeDir params.taxpath
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	input:
 	path shrunk_taxid2accessions
 
@@ -237,6 +252,9 @@ process FETCH_NT {
 	/* */
 
 	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
 	
 	output:
     path "nt.fa.gz"
@@ -256,6 +274,9 @@ process SORT_BY_NAME {
 	/* */
 
 	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
 
 	memory 64.GB
 	
@@ -301,6 +322,9 @@ process SKETCH_WITH_BBSKETCH {
 	
 	publishDir params.bbsketches, mode: 'copy', overwrite: true
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	memory 32.GB
 	
 	input:
@@ -328,6 +352,9 @@ process CLASSIFY_WITH_BBSKETCH {
 	
 	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	cpus 3
 	
 	input:
@@ -353,6 +380,9 @@ process SKETCH_WITH_SYLPH {
 	tag "${sample_id}"
 	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	input:
 	tuple val(sample_id), path(reads)
 	each path(nt_sorted)
@@ -377,6 +407,9 @@ process CLASSIFY_WITH_SYLPH {
 	tag "${sample_id}"
 	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	input:
 	tuple val(sample_id), path(samples), path(queries)
 
@@ -396,6 +429,9 @@ process SKETCH_WITH_SOURMASH {
 	
 	tag "${sample_id}"
 	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
 
 	input:
 	tuple val(sample_id), path(reads)
@@ -421,6 +457,9 @@ process SOURMASH_GATHER {
 	tag "${sample_id}"
 	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
 
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
 	input:
 	tuple val(sample_id), path(signatures), path(index)
 	each path(query_db)
@@ -443,6 +482,9 @@ process CLASSIFY_WITH_SOURMASH {
 	
 	tag "${sample_id}"
 	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
 
 	input:
 
