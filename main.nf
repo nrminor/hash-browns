@@ -240,7 +240,7 @@ process SORT_BY_NAME {
 	
 	publishDir params.sorted_nt, mode: 'copy', overwrite: true
 
-	memory 32.GB
+	memory 64.GB
 	
 	input:
 	path nt_fasta
@@ -253,7 +253,7 @@ process SORT_BY_NAME {
 	
 	script:
 	"""
-	sortbyname.sh -Xmx32g \
+	sortbyname.sh -Xmx64g \
     in=`realpath ${nt_fasta}` out=${params.date}_nt_sorted.fa.gz \
     ow taxa tree=auto fastawrap=1023 zl=9 pigz=32 minlen=60 bgzip unbgzip
 	"""
