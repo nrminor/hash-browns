@@ -8,14 +8,20 @@ nextflow.enable.dsl = 2
 // --------------------------------------------------------------- //
 workflow {
 
-	assert params.taxpath != "" // : "Please set path on your system for storing taxonomy files."
-	assert params.nt_storedir != "" //: "Please set path on your system for storing the NCBI nt database."
+	assert params.taxpath : "Please set path on your system for storing taxonomy files."
+	assert params.nt_storedir : "Please set path on your system for storing the NCBI nt database."
 	
 	// input channels
-    ch_fastqs = Channel
-        .fromPath( "${params.fastq_dir}/**/*.fastq" )
-        .map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
-	
+	if ( params.realtime_dir ) {
+		ch_fastqs = Channel
+			.watchPath( "${params.realtime_dir}/**/*.fastq*", 'create,modify' )
+			.map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
+	} else {
+		ch_fastqs = Channel
+			.fromPath( "${params.fastq_dir}/**/*.fastq*" )
+			.map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
+	}
+    
 	ch_urls = Channel
 		.fromList( params.accession2taxid_urls )
 		.flatten()
@@ -26,16 +32,14 @@ workflow {
 		ch_urls
 	)
 
-	FETCH_TAXONOMY (
-		FETCH_ACCESSION2TAXID.out.collect()
-	)
+	FETCH_TAXONOMY ( )
 
 	UNZIP_TAXONOMY (
 		FETCH_TAXONOMY.out
 	)
 
 	CONSTRUCT_TAX_TREE (
-		UNZIP_TAXONOMY.out.collect()
+		UNZIP_TAXONOMY.out
 	)
 
 	CONSTRUCT_GITABLE (
@@ -49,7 +53,8 @@ workflow {
     FETCH_NT ( )
 
     SORT_BY_NAME (
-        FETCH_NT.out
+        FETCH_NT.out,
+		CONSTRUCT_TAX_TREE.out
     )
 
     // SKETCH_BLACKLIST (
@@ -65,13 +70,28 @@ workflow {
         SKETCH_WITH_BBSKETCH.out.collect()
     )
 
-	// SKETCH_WITH_SYLPH ()
+	SKETCH_WITH_SYLPH (
+		ch_fastqs,
+		SORT_BY_NAME.out
+	)
 
-	// CLASSIFY_WITH_SYLPH ()
+	CLASSIFY_WITH_SYLPH (
+		SKETCH_WITH_SYLPH.out
+	)
 
-	// SKETCH_WITH_SOURMASH ()
+	// SKETCH_WITH_SOURMASH (
+	// 	ch_fastqs,
+	// 	SORT_BY_NAME.out
+	// )
 
-	// CLASSIFY_WITH_SOURMASH ()
+	// SOURMASH_GATHER (
+	// 	SKETCH_WITH_SOURMASH.out,
+	// 	SORT_BY_NAME.out
+	// )
+
+	// CLASSIFY_WITH_SOURMASH (
+	// 	SOURMASH_GATHER.out
+	// )
 	
 }
 // --------------------------------------------------------------- //
@@ -116,7 +136,7 @@ process FETCH_ACCESSION2TAXID {
 	val url
 
 	output:
-	path "*"
+	path "shrunk.${file_name}"
 
 	script:
 	file_name = url.toString().split("/")[-1]
@@ -131,11 +151,8 @@ process FETCH_TAXONOMY {
 
 	storeDir params.taxpath
 
-	input:
-	path accesion2taxid_files
-
 	output:
-	path "*"
+	path "taxdmp.zip"
 
 	script:
 	"""
@@ -170,7 +187,7 @@ process CONSTRUCT_TAX_TREE {
 	path taxdmp_files
 
 	output:
-	path "*"
+	path "tree.taxtree.gz"
 
 	script:
 	"""
@@ -237,19 +254,17 @@ process FETCH_NT {
 process SORT_BY_NAME {
 	
 	/* */
-	
-	publishDir params.sorted_nt, mode: 'copy', overwrite: true
+
+	storeDir params.nt_storedir
 
 	memory 64.GB
 	
 	input:
 	path nt_fasta
+	path taxtree
 	
 	output:
-	path "${params.date}_nt_sorted.fa.gz"
-
-	when:
-	params.download_only == false
+	path "nt_sorted.fa.gz"
 	
 	script:
 	"""
@@ -276,7 +291,7 @@ process SORT_BY_NAME {
 // 	"""
 // 	sketchblacklist.sh -Xmx31g \
 //     in=`realpath ${nt_sorted}` out=blacklist_nt_genus_100.sketch \
-//     prepasses=1 tree=auto taxa taxlevel=genus ow mincount=120 k=32,24 depth taxpath=${params.taxpath}
+//     prepasses=1 tree="tree.taxtree.gz" taxa taxlevel=genus ow mincount=120 k=32,24 depth taxpath=${params.taxpath}
 // 	"""
 // }
 
@@ -293,12 +308,16 @@ process SKETCH_WITH_BBSKETCH {
 	
 	output:
 	path "taxa*.sketch"
+
+	when:
+	params.download_only == false && bbsketch
 	
 	script:
 	"""
 	bbsketch.sh -Xmx32g 
     in=`realpath ${nt_sorted}` out=taxa#.sketch \
-    mode=taxa tree=auto files=31 ow unpigz minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
+    mode=taxa tree="tree.taxtree.gz" files=31 ow unpigz \
+	minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
     # blacklist=blacklist_nt_genus_100.sketch 
 	"""
 }
@@ -308,6 +327,8 @@ process CLASSIFY_WITH_BBSKETCH {
 	/* */
 	
 	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
+
+	cpus 3
 	
 	input:
     tuple val(sample_id), path(fastq)
@@ -315,49 +336,123 @@ process CLASSIFY_WITH_BBSKETCH {
 	
 	output:
 	path "*"
-
-	when:
-	params.download_only == false
 	
 	script:
 	"""
 	comparesketch.sh \
-    in=`realpath ${fastq}` k=32,24 tree=auto taxa*.sketch \
+    in=`realpath ${fastq}` k=32,24 tree="tree.taxtree.gz" taxa*.sketch \
     exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus # \
     # blacklist=blacklist_nt_genus_100.sketch
 	"""
 }
 
-// process SKETCH_WITH_SYLPH {
+process SKETCH_WITH_SYLPH {
 	
-// 	/* */
+	/* */
 	
-// 	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
+	tag "${sample_id}"
+	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
 
-// }
+	input:
+	tuple val(sample_id), path(reads)
+	each path(nt_sorted)
 
-// process CLASSIFY_WITH_SYLPH {
-	
-// 	/* */
-	
-// 	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
-	
-// }
+	output:
+	tuple val(sample_id), path("${sample_id}_database.sylsp"), path("${sample_id}_database.syldb")
 
-// process SKETCH_WITH_SOURMASH {
-	
-// 	/* */
-	
-// 	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+	when:
+	params.download_only == false && sylph
 
-// }
+	script:
+	"""
+	sylph sketch ${reads} ${nt_sorted} -o ${sample_id}_database
+	"""
 
-// process CLASSIFY_WITH_SOURMASH {
-	
-// 	/* */
-	
-// 	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
+}
 
-// }
+process CLASSIFY_WITH_SYLPH {
+	
+	/* */
+	
+	tag "${sample_id}"
+	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
+
+	input:
+	tuple val(sample_id), path(samples), path(queries)
+
+	output:
+	path "${sample_id}_sylph_results.tsv"
+
+	script:
+	"""
+	sylph query ${samples} ${queries} -o ${sample_id}_sylph_results.tsv
+	"""
+	
+}
+
+process SKETCH_WITH_SOURMASH {
+	
+	/* */
+	
+	tag "${sample_id}"
+	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+
+	input:
+	tuple val(sample_id), path(reads)
+
+	output:
+	tuple val(sample_id), path("${sample_id}_reads.sig"), path("${sample_id}_reads.sbt.zip")
+
+	when:
+	params.download_only == false && sourmash
+
+	script:
+	"""
+	sourmash sketch dna -p scaled=10000,k=31 ${reads} -o ${sample_id}_reads.sig && \
+	sourmash index ${sample_id}_reads ${sample_id}_reads.sig
+	"""
+
+}
+
+process SOURMASH_GATHER {
+	
+	/* */
+	
+	tag "${sample_id}"
+	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+
+	input:
+	tuple val(sample_id), path(signatures), path(index)
+	each path(query_db)
+
+	output:
+
+	when:
+	params.download_only == false && sourmash
+
+	script:
+	"""
+	sourmash gather -p abund ${signatures} ${query_db} -o ${sample_id}_sourmash_results.csv
+	"""
+
+}
+
+process CLASSIFY_WITH_SOURMASH {
+	
+	/* */
+	
+	tag "${sample_id}"
+	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
+
+	input:
+
+	output:
+
+	script:
+	"""
+	sourmash tax metagenome
+	"""
+
+}
 
 // --------------------------------------------------------------- //
