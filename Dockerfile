@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \ 
     zstd \
     pigz \
+    unzip \
     wget \
     curl \
     git \
