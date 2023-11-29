@@ -291,7 +291,8 @@ process SORT_BY_NAME {
 	"""
 	sortbyname.sh -Xmx64g \
     in=`realpath ${nt_fasta}` out=${params.date}_nt_sorted.fa.gz \
-    ow taxa tree=auto fastawrap=1023 zl=9 pigz=32 minlen=60 bgzip unbgzip
+    ow taxa taxpath=${params.taxpath} tree="tree.taxtree.gz" fastawrap=1023 zl=9\
+	pigz=32 minlen=60 bgzip unbgzip
 	"""
 }
 
