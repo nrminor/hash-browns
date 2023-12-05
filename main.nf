@@ -52,8 +52,12 @@ workflow {
 
     FETCH_NT ( )
 
+	GI2TAXID (
+		FETCH_NT.out
+	)
+
     SORT_BY_NAME (
-        FETCH_NT.out,
+        GI2TAXID.out,
 		CONSTRUCT_TAX_TREE.out
     )
 
@@ -257,13 +261,33 @@ process FETCH_NT {
 	maxRetries 1
 	
 	output:
+    path "nt.gz"
+	
+	script:
+	"""
+	wget ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz
+	"""
+}
+
+process GI2TAXID {
+	
+	/* */
+
+	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	input:
+	path nt
+	
+	output:
     path "nt.fa.gz"
 	
 	script:
 	"""
-	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
-    | gi2taxid.sh -Xmx1g \
-    in=stdin.fa.gz out=nt.fa.gz \
+	gi2taxid.sh -Xmx1g \
+    in=`realpath ${nt}` out=nt.fa.gz \
     pigz=32 unpigz=t bgzip=t preferbgzip=t zl=8 server ow shrinknames maxbadheaders=5000 \
     badheaders=badHeaders.txt taxpath=${params.taxpath}
 	"""
@@ -291,7 +315,7 @@ process SORT_BY_NAME {
 	"""
 	sortbyname.sh -Xmx64g \
     in=`realpath ${nt_fasta}` out=nt_sorted.fa.gz \
-    ow taxa taxpath=${params.taxpath} tree="tree.taxtree.gz" fastawrap=1023 zl=9 \
+    ow taxa taxpath=${params.taxpath} tree="tree.taxtree.gz" fastawrap=1023 zl=9 fixjunk \
 	pigz=32 minlen=60 bgzip unbgzip
 	"""
 }
