@@ -265,7 +265,7 @@ process FETCH_NT {
 	
 	script:
 	"""
-	wget ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz
+	wget -q ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz
 	"""
 }
 
@@ -288,7 +288,7 @@ process GI2TAXID {
 	"""
 	gi2taxid.sh -Xmx1g \
     in=`realpath ${nt}` out=nt.fa.gz \
-    pigz=32 unpigz=t bgzip=t preferbgzip=t zl=8 server ow shrinknames maxbadheaders=5000 \
+    pigz=32 unpigz=t bgzip=t preferbgzip=t zl=8 server=f ow shrinknames maxbadheaders=5000 \
     badheaders=badHeaders.txt taxpath=${params.taxpath}
 	"""
 }
