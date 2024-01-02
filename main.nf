@@ -101,7 +101,7 @@ workflow {
 
     CLASSIFY_WITH_BBSKETCH (
         ch_fastqs,
-        SKETCH_WITH_BBSKETCH.out.collect()
+        SKETCH_NT_WITH_BBSKETCH.out.collect()
     )
 
 	SKETCH_NT_WITH_SYLPH (
