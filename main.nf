@@ -28,11 +28,11 @@ log.info	"""
 
 			Run settings:
 			-----------------------------------
-			[realtime_dir   : ${params.realtime_dir}   ]
-			[cleanup        : ${params.cleanup}        ]
-			[download only? : ${params.download_only}  ]
-			[available cpus : ${params.available_cpus} ]
-			[run date       : ${params.date}           ]
+			[realtime_dir   : ${params.realtime_dir}]
+			[cleanup        : ${params.cleanup}]
+			[download only? : ${params.download_only}]
+			[available cpus : ${params.available_cpus}]
+			[run date       : ${params.date}]
 			"""
 			.stripIndent()
 
