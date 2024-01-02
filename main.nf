@@ -396,17 +396,17 @@ process SKETCH_NT_WITH_BBSKETCH {
 	path "taxa*.sketch"
 
 	when:
-	params.download_only == false && bbsketch == true
+	params.download_only == false && params.bbsketch == true
 	
 	script:
 	"""
 	bbsketch.sh \
     in=${nt_fasta} \
-    out=taxa#.sketch \
+    out=taxa.sketch \
     k=32,24 autosize=t depth=t minsize=300 \
-    server=f prefilter=t tossjunk=t ow unpigz \
+    prefilter=t tossjunk=t ow unpigz \
     mode=taxa taxpath=${params.taxpath} \
-    tree=${params.taxpath}/tree.taxtree.gz files=31 ow unpigz \
+    tree=${params.taxpath}/tree.taxtree.gz files=1 ow unpigz \
     minsize=300 prefilter autosize k=32,24 depth
 	"""
 }
@@ -460,7 +460,7 @@ process SKETCH_NT_WITH_SYLPH {
 	tuple val(sample_id), path("nt_k31.syldb")
 
 	when:
-	params.download_only == false && sylph == true
+	params.download_only == false && params.sylph == true
 
 	script:
 	"""
@@ -488,7 +488,7 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	tuple val(sample_id), path("${sample_id}.sylsp")
 
 	when:
-	params.download_only == false && sylph == true
+	params.download_only == false && params.sylph == true
 
 	script:
 	"""
@@ -542,7 +542,7 @@ process SKETCH_NT_WITH_SOURMASH {
 	path "nt_k31.sig.gz"
 
 	when:
-	params.download_only == false && sourmash == true
+	params.download_only == false && params.sourmash == true
 
 	script:
 	"""
@@ -568,7 +568,7 @@ process SKETCH_SAMPLE_WITH_SOURMASH {
 	tuple val(sample_id), path("${sample_id}_reads.sig"), path("${sample_id}_reads.sbt.zip")
 
 	when:
-	params.download_only == false && sourmash
+	params.download_only == false && params.sourmash == true
 
 	script:
 	"""
@@ -595,7 +595,7 @@ process SOURMASH_GATHER {
 	output:
 
 	when:
-	params.download_only == false && sourmash
+	params.download_only == false && params.sourmash == true
 
 	script:
 	"""
