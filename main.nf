@@ -86,10 +86,10 @@ workflow {
 		FETCH_NT.out
 	)
 
-    SORT_BY_NAME (
-        GI2TAXID.out,
-		CONSTRUCT_TAX_TREE.out
-    )
+    // SORT_BY_NAME (
+    //     GI2TAXID.out,
+	// 	CONSTRUCT_TAX_TREE.out
+    // )
 
     // SKETCH_BLACKLIST (
     //     SORT_BY_NAME.out
