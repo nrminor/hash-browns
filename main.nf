@@ -13,26 +13,26 @@ log.info	"""
 			===================================
 			fastq_dir       : ${params.fastq_dir}
 			results_dir     : ${params.results}
-			query_fasta		: ${params.query_fasta}
+			query_fasta     : ${params.query_fasta}
 
 			Storage directories:
 			-----------------------------------
-			Taxonomy dir	: ${params.taxpath}
-			NCBI NT dir		: ${params.nt_storedir}
+			Taxonomy dir    : ${params.taxpath}
+			NCBI NT dir     : ${params.nt_storedir}
 
 			Chosen tools:
 			-----------------------------------
-			BBSketch   		: ${params.bbsketch}
-			Sylph			: ${params.sylph}
-			Sourmash		: ${params.sourmash}
+			BBSketch        : ${params.bbsketch}
+			Sylph           : ${params.sylph}
+			Sourmash        : ${params.sourmash}
 
 			Run settings:
 			-----------------------------------
-			[realtime_dir   : ${params.realtime_dir}]
-			[cleanup        : ${params.cleanup}]
-			[download only? : ${params.download_only}]
-			[available cpus : ${params.available_cpus}]
-			[run date		: ${params.date}]
+			[realtime_dir   : ${params.realtime_dir}   ]
+			[cleanup        : ${params.cleanup}        ]
+			[download only? : ${params.download_only}  ]
+			[available cpus : ${params.available_cpus} ]
+			[run date       : ${params.date}           ]
 			"""
 			.stripIndent()
 
