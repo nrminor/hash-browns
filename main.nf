@@ -65,8 +65,8 @@ workflow {
     //     SORT_BY_NAME.out
     // )
 
-    SKETCH_WITH_BBSKETCH (
-        SORT_BY_NAME.out
+    SKETCH_NT_WITH_BBSKETCH (
+        GI2TAXID.out
     )
 
     CLASSIFY_WITH_BBSKETCH (
@@ -74,28 +74,31 @@ workflow {
         SKETCH_WITH_BBSKETCH.out.collect()
     )
 
-	SKETCH_WITH_SYLPH (
-		ch_fastqs,
-		SORT_BY_NAME.out
+	SKETCH_NT_WITH_SYLPH (
+        GI2TAXID.out
+	)
+
+	SKETCH_SAMPLE_WITH_SYLPH (
+		ch_fastqs
 	)
 
 	CLASSIFY_WITH_SYLPH (
+		SKETCH_NT_WITH_SYLPH.out,
 		SKETCH_WITH_SYLPH.out
 	)
 
-	// SKETCH_WITH_SOURMASH (
-	// 	ch_fastqs,
-	// 	SORT_BY_NAME.out
-	// )
+	SKETCH_NT_WITH_SOURMASH (
+		GI2TAXID.out
+	)
 
-	// SOURMASH_GATHER (
-	// 	SKETCH_WITH_SOURMASH.out,
-	// 	SORT_BY_NAME.out
-	// )
+	SKETCH_SAMPLE_WITH_SOURMASH (
+		ch_fastqs
+	)
 
-	// CLASSIFY_WITH_SOURMASH (
-	// 	SOURMASH_GATHER.out
-	// )
+	SOURMASH_GATHER (
+		SKETCH_WITH_SOURMASH.out,
+		SKETCH_NT_WITH_SOURMASH.out
+	)
 	
 }
 // --------------------------------------------------------------- //
@@ -293,32 +296,32 @@ process GI2TAXID {
 	"""
 }
 
-process SORT_BY_NAME {
+// process SORT_BY_NAME {
 	
-	/* */
+// 	/* */
 
-	storeDir params.nt_storedir
+// 	storeDir params.nt_storedir
 
-	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
-	maxRetries 1
+// 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+// 	maxRetries 1
 
-	memory 64.GB
+// 	memory 64.GB
 	
-	input:
-	path nt_fasta
-	path taxtree
+// 	input:
+// 	path nt_fasta
+// 	path taxtree
 	
-	output:
-	path "nt_sorted.fa.gz"
+// 	output:
+// 	path "nt_sorted.fa.gz"
 	
-	script:
-	"""
-	sortbyname.sh -Xmx64g \
-    in=`realpath ${nt_fasta}` out=nt_sorted.fa.gz \
-    ow taxa taxpath=${params.taxpath} tree="tree.taxtree.gz" fastawrap=1023 zl=9 fixjunk \
-	pigz=32 minlen=60 bgzip unbgzip
-	"""
-}
+// 	script:
+// 	"""
+// 	sortbyname.sh -Xmx64g \
+//     in=`realpath ${nt_fasta}` out=nt_sorted.fa.gz \
+//     ow taxa taxpath=${params.taxpath} tree="tree.taxtree.gz" fastawrap=1023 zl=9 fixjunk \
+// 	pigz=32 minlen=60 bgzip unbgzip
+// 	"""
+// }
 
 // process SKETCH_BLACKLIST {
 	
@@ -341,11 +344,11 @@ process SORT_BY_NAME {
 // 	"""
 // }
 
-process SKETCH_WITH_BBSKETCH {
+process SKETCH_NT_WITH_BBSKETCH {
 	
 	/* */
-	
-	publishDir params.bbsketches, mode: 'copy', overwrite: true
+
+	storeDir params.nt_storedir
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
@@ -353,7 +356,7 @@ process SKETCH_WITH_BBSKETCH {
 	memory 32.GB
 	
 	input:
-	path nt_sorted
+	path nt_fasta
 	
 	output:
 	path "taxa*.sketch"
@@ -363,11 +366,14 @@ process SKETCH_WITH_BBSKETCH {
 	
 	script:
 	"""
-	bbsketch.sh -Xmx32g 
-    in=`realpath ${nt_sorted}` out=taxa#.sketch \
-    mode=taxa tree="tree.taxtree.gz" files=31 ow unpigz \
-	minsize=300 prefilter autosize k=32,24 depth taxpath=${params.taxpath} # \
-    # blacklist=blacklist_nt_genus_100.sketch 
+	bbsketch.sh \
+    in=${nt_fasta} \
+    out=taxa#.sketch \
+    k=32,24 autosize=t depth=t minsize=300 \
+    server=f prefilter=t tossjunk=t ow unpigz \
+    mode=taxa taxpath=${params.taxpath} \
+    tree=${params.taxpath}/tree.taxtree.gz files=31 ow unpigz \
+    minsize=300 prefilter autosize k=32,24 depth
 	"""
 }
 
@@ -375,30 +381,63 @@ process CLASSIFY_WITH_BBSKETCH {
 	
 	/* */
 	
+	tag "${sample_id}"
 	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
 	cpus 3
+	memory 32.GB
 	
 	input:
     tuple val(sample_id), path(fastq)
-	each path(nt_sorted)
+	each path(nt_sketches)
 	
 	output:
 	path "*"
 	
 	script:
 	"""
-	comparesketch.sh \
-    in=`realpath ${fastq}` k=32,24 tree="tree.taxtree.gz" taxa*.sketch \
-    exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus # \
-    # blacklist=blacklist_nt_genus_100.sketch
+	comparesketch.sh -Xmx${task.memory}g \
+	in=${fastq} out=${sample_id}_profiled.tsv \
+	tree=${params.taxdir}/tree.taxtree.gz taxa*.sketch \
+	k=32,24 mode=sequence level=1 format=3 records=1 printtaxa=t ow \
+	exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus && \
+	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > 02_clean.virus_only.bbmap_profiled.tsv
 	"""
 }
 
-process SKETCH_WITH_SYLPH {
+process SKETCH_NT_WITH_SYLPH {
+	
+	/* */
+
+	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	cpus 8
+
+	input:
+	path nt_db
+
+	output:
+	tuple val(sample_id), path("nt_k31.syldb")
+
+	when:
+	params.download_only == false && sylph
+
+	script:
+	"""
+	sylph sketch \
+	--threads ${task.cpus} -k 31 \
+	${nt_db} -o nt_k31
+	"""
+
+}
+
+process SKETCH_SAMPLE_WITH_SYLPH {
 	
 	/* */
 	
@@ -410,17 +449,18 @@ process SKETCH_WITH_SYLPH {
 
 	input:
 	tuple val(sample_id), path(reads)
-	each path(nt_sorted)
 
 	output:
-	tuple val(sample_id), path("${sample_id}_database.sylsp"), path("${sample_id}_database.syldb")
+	tuple val(sample_id), path("${sample_id}.sylsp")
 
 	when:
 	params.download_only == false && sylph
 
 	script:
 	"""
-	sylph sketch ${reads} ${nt_sorted} -o ${sample_id}_database
+	sylph sketch \
+	--threads ${task.cpus} -k 31 --individual-records \
+	${reads} -o ${sample_id}
 	"""
 
 }
@@ -436,19 +476,50 @@ process CLASSIFY_WITH_SYLPH {
 	maxRetries 1
 
 	input:
-	tuple val(sample_id), path(samples), path(queries)
+	tuple val(sample_id), path(sample_sketches)
+	each path(nt_syldb)
 
 	output:
 	path "${sample_id}_sylph_results.tsv"
 
 	script:
 	"""
-	sylph query ${samples} ${queries} -o ${sample_id}_sylph_results.tsv
+	sylph profile \
+	-t 12 --minimum-ani 75 --estimate-unknown \
+	${sample_sketches} ${nt_syldb} \
+	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv
 	"""
 	
 }
 
-process SKETCH_WITH_SOURMASH {
+process SKETCH_NT_WITH_SOURMASH {
+	
+	/* */
+
+	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	input:
+	path nt_db
+
+	output:
+	path "nt_k31.sig.gz"
+
+	when:
+	params.download_only == false && sourmash
+
+	script:
+	"""
+	sourmash sketch dna -p k=31,scaled=1000,abund -f -o nt_k31.sig.gz ${nt_db}
+	sourmash sketch dna -p scaled=1000,k=31 ${reads} -o ${sample_id}_reads.sig && \
+	sourmash index ${sample_id}_reads ${sample_id}_reads.sig
+	"""
+
+}
+
+process SKETCH_SAMPLE_WITH_SOURMASH {
 	
 	/* */
 	
@@ -469,7 +540,7 @@ process SKETCH_WITH_SOURMASH {
 
 	script:
 	"""
-	sourmash sketch dna -p scaled=10000,k=31 ${reads} -o ${sample_id}_reads.sig && \
+	sourmash sketch dna -p scaled=1000,k=31 ${reads} -o ${sample_id}_reads.sig && \
 	sourmash index ${sample_id}_reads ${sample_id}_reads.sig
 	"""
 
@@ -486,8 +557,8 @@ process SOURMASH_GATHER {
 	maxRetries 1
 
 	input:
-	tuple val(sample_id), path(signatures), path(index)
-	each path(query_db)
+	tuple val(sample_id), path(sample_sigs), path(index)
+	each path(nt_sigs)
 
 	output:
 
@@ -496,28 +567,7 @@ process SOURMASH_GATHER {
 
 	script:
 	"""
-	sourmash gather -p abund ${signatures} ${query_db} -o ${sample_id}_sourmash_results.csv
-	"""
-
-}
-
-process CLASSIFY_WITH_SOURMASH {
-	
-	/* */
-	
-	tag "${sample_id}"
-	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
-
-	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
-	maxRetries 1
-
-	input:
-
-	output:
-
-	script:
-	"""
-	sourmash tax metagenome
+	sourmash gather -p abund ${nt_sigs} ${sample_sigs} -o ${sample_id}_sourmash_results.csv
 	"""
 
 }
