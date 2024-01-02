@@ -6,6 +6,36 @@ nextflow.enable.dsl = 2
 
 // WORKFLOW SPECIFICATION
 // --------------------------------------------------------------- //
+
+// prints to the screen and to the log
+log.info	"""
+			HASH-BROWNS (version 0.1.0)
+			===================================
+			fastq_dir       : ${params.fastq_dir}
+			results_dir     : ${params.results}
+			query_fasta		: ${params.query_fasta}
+
+			Storage directories:
+			-----------------------------------
+			Taxonomy dir	: ${params.taxpath}
+			NCBI NT dir		: ${params.nt_storedir}
+
+			Chosen tools:
+			-----------------------------------
+			BBSketch   		: ${params.min_reads}
+			Sylph			: ${params.sylph}
+			Sourmash		: ${params.sourmash}
+
+			Run settings:
+			-----------------------------------
+			[realtime_dir   : ${params.realtime_dir}	]
+			[cleanup        : ${params.cleanup}			]
+			[download only? : ${params.download_only}	]
+			[available cpus : ${params.available_cpus}	]
+			[run date		: ${params.date}			]
+			"""
+			.stripIndent()
+
 workflow {
 
 	assert params.taxpath : "Please set path on your system for storing taxonomy files."
