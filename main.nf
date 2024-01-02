@@ -82,9 +82,9 @@ workflow {
 
     FETCH_NT ( )
 
-	GI2TAXID (
-		FETCH_NT.out
-	)
+	// GI2TAXID (
+	// 	FETCH_NT.out
+	// )
 
     // SORT_BY_NAME (
     //     GI2TAXID.out,
@@ -96,7 +96,7 @@ workflow {
     // )
 
     SKETCH_NT_WITH_BBSKETCH (
-        GI2TAXID.out
+        FETCH_NT.out
     )
 
     CLASSIFY_WITH_BBSKETCH (
@@ -105,7 +105,7 @@ workflow {
     )
 
 	SKETCH_NT_WITH_SYLPH (
-        GI2TAXID.out
+        FETCH_NT.out
 	)
 
 	SKETCH_SAMPLE_WITH_SYLPH (
@@ -118,7 +118,7 @@ workflow {
 	)
 
 	SKETCH_NT_WITH_SOURMASH (
-		GI2TAXID.out
+		FETCH_NT.out
 	)
 
 	SKETCH_SAMPLE_WITH_SOURMASH (
@@ -294,11 +294,15 @@ process FETCH_NT {
 	maxRetries 1
 	
 	output:
-    path "nt.gz"
+    path "nt.fa.gz"
 	
 	script:
 	"""
-	wget -q ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz
+	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
+	| gi2taxid.sh -Xmx1g \
+    in=stdin.fa.gz out=nt.fa.gz \
+    pigz=32 unpigz=t bgzip=t preferbgzip=t zl=8 server=f ow shrinknames maxbadheaders=5000 \
+    badheaders=badHeaders.txt taxpath=${params.taxpath}
 	"""
 }
 
@@ -392,7 +396,7 @@ process SKETCH_NT_WITH_BBSKETCH {
 	path "taxa*.sketch"
 
 	when:
-	params.download_only == false && bbsketch
+	params.download_only == false && bbsketch == true
 	
 	script:
 	"""
@@ -456,7 +460,7 @@ process SKETCH_NT_WITH_SYLPH {
 	tuple val(sample_id), path("nt_k31.syldb")
 
 	when:
-	params.download_only == false && sylph
+	params.download_only == false && sylph == true
 
 	script:
 	"""
@@ -484,7 +488,7 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	tuple val(sample_id), path("${sample_id}.sylsp")
 
 	when:
-	params.download_only == false && sylph
+	params.download_only == false && sylph == true
 
 	script:
 	"""
@@ -538,13 +542,11 @@ process SKETCH_NT_WITH_SOURMASH {
 	path "nt_k31.sig.gz"
 
 	when:
-	params.download_only == false && sourmash
+	params.download_only == false && sourmash == true
 
 	script:
 	"""
 	sourmash sketch dna -p k=31,scaled=1000,abund -f -o nt_k31.sig.gz ${nt_db}
-	sourmash sketch dna -p scaled=1000,k=31 ${reads} -o ${sample_id}_reads.sig && \
-	sourmash index ${sample_id}_reads ${sample_id}_reads.sig
 	"""
 
 }
