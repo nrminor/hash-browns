@@ -236,6 +236,7 @@ process READ_QC {
 	script:
 	"""
 	nanoq -i ${reads} \
+	--min-len 200 --min-qual 10 \
 	-r ${sample_id}_nanoq_report.txt \
 	> ${sample_id}_nanoq.fastq.gz
 	"""
@@ -570,8 +571,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	comparesketch.sh -Xmx32g \
 	in=${fastq} out=${sample_id}_profiled.tsv \
 	tree=${params.taxpath}/tree.taxtree.gz taxa.sketch \
-	k=32,24 level=1 format=3 records=1 printtaxa=t ow sortbyani=t \
-	exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus && \
+	k=32,24 level=1 format=3 records=1 printtaxa=t ow sortbyani=t && \
 	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > ${sample_id}.virus_only.bbmap_profiled.tsv
 	"""
 }
