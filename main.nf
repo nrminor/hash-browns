@@ -67,7 +67,7 @@ workflow {
 	
 	// Workflow steps
 	VALIDATE_SEQS (
-		ch_fastqs.out
+		ch_fastqs
 	)
 	
 	READ_QC (
