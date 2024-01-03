@@ -59,10 +59,10 @@ RUN wget https://github.com/shenwei356/seqkit/releases/download/v2.1.0/seqkit_li
     rm seqkit_linux_amd64.tar.gz
 
 # Install SeqFu
-RUN git clone https://github.com/telatin/seqfu2 \
-    cd seqfu2 \
-    nimble build \
-    cd .. \
+RUN git clone https://github.com/telatin/seqfu2 && \
+    cd seqfu2 && \
+    nimble build && \
+    cd .. && \
     mv seqfu2 /opt
 ENV PATH="${PATH}:/opt/seqfu2/bin"
 

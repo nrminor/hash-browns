@@ -34,18 +34,6 @@ log.info	"""
 			[download only? : ${params.download_only}]
 			[available cpus : ${params.available_cpus}]
 			[run date       : ${params.date}]
-
-			HASH-BROWNS DISCLAIMERS:
-			-----------------------------------
-			1) Hash-Browns currently only supports Oxford Nanopore
-			long reads.
-			2) By default, Hash-Browns looks for the bioinformatic
-			tools it depends on locally rather than pulling a container
-			or otherwise installing. To use a container, use the flag
-			`-profile docker` in your `nextflow run` command.
-			Alternatively, install Just with `cargo install just` from
-			the Rust toolchain and use the relevant recipe to ensure
-			all Hash-Brown dependencies are installed.
 			"""
 			.stripIndent()
 

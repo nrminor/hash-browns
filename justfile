@@ -66,3 +66,4 @@ all-macos:
     just rs
     just py
     just lb
+alias mac := all-macos
