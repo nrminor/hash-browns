@@ -474,7 +474,7 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	/* */
 	
 	tag "${sample_id}"
-	publishDir params.sylph_sketches, mode: 'copy', overwrite: true
+	// publishDir params.sylph_sketches, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
