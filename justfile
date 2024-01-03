@@ -36,7 +36,7 @@ python:
     pip install sourmash==4.8.4
 alias py := python
 
-# Packages to build from source localled (bbtools, seqfu, and centrifuge)
+# Packages to build from source localled (bbtools, seqfu, nextflow, and centrifuge)
 local-builds:
     @echo "Installing the bbmap suite."
     touch ~/.zprofile
@@ -51,6 +51,12 @@ local-builds:
     git clone https://github.com/telatin/seqfu2 ~/bioinformatics/seqfu2
     (cd ~/bioinformatics/seqfu2 && nimble build)
     echo "export PATH=$PATH:~/bioinformatics/seqfu2/bin" >> ~/.zprofile
+    source ~/.zprofile
+    @echo "Installing Nextflow"
+    wget -qO- https://get.nextflow.io | bash
+    -mkdir ~/bioinformatics/nextflow
+    mv nextflow ~/bioinformatics/nextflow
+    echo "export PATH=$PATH:~/bioinformatics/nextflow" >> ~/.zprofile
     source ~/.zprofile
     @echo "Installing Centrifuge"
     git clone https://github.com/DaehwanKimLab/centrifuge
