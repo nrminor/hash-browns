@@ -79,7 +79,7 @@ workflow {
 	)
 
 	MULTIQC_REPORT (
-		FASTQC_REPORT.out.collect()
+		FASTQC_REPORT.out.multiqc_data.collect()
 	)
 
 	FETCH_ACCESSION2TAXID (
