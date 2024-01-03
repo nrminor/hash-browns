@@ -34,6 +34,13 @@ log.info	"""
 			[download only? : ${params.download_only}]
 			[available cpus : ${params.available_cpus}]
 			[run date       : ${params.date}]
+
+			PLEASE NOTE:
+			Hash-Browns currently only supports Oxford Nanopore
+			long reads. Support for short reads may be added in
+			the future, though we recommend users consider using
+			nf-core/taxprofiler or nf-core/mag for profiling
+			short read datasets.
 			"""
 			.stripIndent()
 
@@ -59,6 +66,22 @@ workflow {
 	
 	
 	// Workflow steps
+	VALIDATE_SEQS (
+		ch_fastqs.out
+	)
+	
+	READ_QC (
+		VALIDATE_SEQS.out
+	)
+
+	FASTQC_REPORT (
+		READ_QC.out
+	)
+
+	MULTIQC_REPORT (
+		FASTQC_REPORT.out.collect()
+	)
+
 	FETCH_ACCESSION2TAXID (
 		ch_urls
 	)
@@ -101,7 +124,7 @@ workflow {
     )
 
     CLASSIFY_WITH_BBSKETCH (
-        ch_fastqs,
+        READ_QC.out,
         SKETCH_NT_WITH_BBSKETCH.out.collect()
     )
 
@@ -110,7 +133,7 @@ workflow {
 	)
 
 	SKETCH_SAMPLE_WITH_SYLPH (
-		ch_fastqs
+		READ_QC.out
 	)
 
 	CLASSIFY_WITH_SYLPH (
@@ -123,7 +146,7 @@ workflow {
 	)
 
 	SKETCH_SAMPLE_WITH_SOURMASH (
-		ch_fastqs
+		READ_QC.out
 	)
 
 	SOURMASH_GATHER (
@@ -139,6 +162,10 @@ workflow {
 // DERIVATIVE PARAMETER SPECIFICATION
 // --------------------------------------------------------------- //
 // Additional parameters that are derived from parameters set in nextflow.config
+params.preprocessing = params.results + "/preprocessing"
+params.read_checks = params.preprocessing + "/1_read_checks"
+params.filtered = params.preprocessing + "/2_filtered_reads"
+params.fastqc_results = params.preprocessing + "/3_FastQC_reports"
 
 // bbsketch results
 params.bbsketch_results = params.results + "/bbsketch"
@@ -163,6 +190,120 @@ params.sourmash_classifications = params.sourmash_results + "/classifications"
 
 // PROCESS SPECIFICATION 
 // --------------------------------------------------------------- //
+
+process VALIDATE_SEQS {
+
+    /*
+    */
+
+	tag "${sample_id}"
+    label "general"
+	publishDir params.read_checks, pattern: "*.tsv", mode: 'copy', overwrite: true
+
+	errorStrategy 'ignore'
+
+	cpus 1
+
+	input:
+	tuple val(sample_id), path(reads)
+
+	output:
+	tuple val(sample_id), path(reads), path("${sample_id}_seqfu_report.tsv")
+
+	script:
+	"""
+	seqfu check \
+	--deep --thousands \
+	${reads} > ${sample_id}_seqfu_report.tsv
+	"""
+}
+
+// process FILTLONG {}
+
+process READ_QC {
+
+	/*
+	*/
+
+	tag "${sample_id}"
+    label "general"
+	publishDir params.filtered, mode: 'copy', overwrite: true
+
+	errorStrategy { task.attempt < 3 ? 'retry' : params.errorMode }
+	maxRetries 2
+
+	cpus 1
+
+	input:
+	tuple val(sample_id), path(reads), path(report)
+
+	output:
+	tuple val(sample_id), path("${sample_id}_nanoq.fastq.gz")
+
+	script:
+	"""
+	nanoq -i ${reads} \
+	-r ${sample_id}_nanoq_report.txt \
+	> ${sample_id}_nanoq.fastq.gz
+	"""
+
+}
+
+process FASTQC_REPORT {
+
+    /*
+    */
+
+	tag "${sample_id}"
+    label "general"
+	publishDir params.fastqc_results, mode: 'copy', overwrite: true
+
+	errorStrategy { task.attempt < 3 ? 'retry' : params.errorMode }
+	maxRetries 2
+
+	cpus 1
+
+	input:
+	tuple val(sample_id), path(reads)
+
+	output:
+	path "${sample_id}_qc.html", emit: html
+	path "${sample_id}/", emit: multiqc_data
+
+	script:
+	"""
+	fqc -q ${reads} -s . > ${sample_id}_qc.html
+	mkdir ${sample_id}
+	mv fastqc_data.txt ${sample_id}/fastqc_data.txt
+	"""
+
+}
+
+process MULTIQC_REPORT {
+
+    /*
+    */
+	
+    label "multiqc"
+	publishDir params.preprocessing, mode: 'copy', overwrite: true
+
+	errorStrategy { task.attempt < 3 ? 'retry' : params.errorMode }
+	maxRetries 2
+
+	cpus 1
+
+	input:
+	path fastqc_files
+
+	output:
+	path("*.html")
+
+	script:
+	"""
+	multiqc ${fastqc_files}
+	"""
+
+}
 
 process FETCH_ACCESSION2TAXID {
 
