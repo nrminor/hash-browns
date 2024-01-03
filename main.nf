@@ -451,20 +451,20 @@ process SKETCH_NT_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus 8
+	cpus ${params.available_cpus}
 
 	input:
 	path nt_db
 
 	output:
-	path "nt_k31.syldb"
+	path "nt_c1000_k31.syldb"
 
 	when:
 	params.download_only == false && params.sylph == true
 
 	script:
 	"""
-	sylph sketch -t ${task.cpus} -k 31 -i -g ${nt_db} -o nt_k31
+	sylph sketch -t ${task.cpus} -k 31 -c 1000 -g ${nt_db} -o nt_c1000_k31
 	"""
 
 }
@@ -479,6 +479,8 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
+	cpus 2
+
 	input:
 	tuple val(sample_id), path(reads)
 
@@ -490,9 +492,7 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 
 	script:
 	"""
-	sylph sketch \
-	-t ${task.cpus} -k 31 --individual-records -o ${sample_id} \
-	${reads}
+	sylph sketch -t ${task.cpus} -k 31 -c 100 -r ${reads} -o ${sample_id}
 	"""
 
 }
@@ -507,6 +507,8 @@ process CLASSIFY_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
+	cpus 8
+
 	input:
 	tuple val(sample_id), path(sample_sketches)
 	each path(nt_syldb)
@@ -517,7 +519,7 @@ process CLASSIFY_WITH_SYLPH {
 	script:
 	"""
 	sylph profile \
-	-t 12 --minimum-ani 75 --estimate-unknown \
+	-t ${task.cpus} --minimum-ani 80 --estimate-unknown -M 20 --read-seq-id 0.98 \
 	${sample_sketches} ${nt_syldb} \
 	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv
 	"""
@@ -531,7 +533,9 @@ process SKETCH_NT_WITH_SOURMASH {
 	storeDir params.nt_storedir
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
-	maxRetries 1
+	maxRetries 
+	
+	memory 100.GB
 
 	input:
 	path nt_db
