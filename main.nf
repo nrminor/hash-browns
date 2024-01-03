@@ -539,10 +539,9 @@ process SKETCH_NT_WITH_BBSKETCH {
     in=${nt_fasta} \
     out=taxa.sketch \
     k=32,24 autosize=t depth=t minsize=300 \
-    prefilter=t tossjunk=t ow unpigz \
+    prefilter=t tossjunk=t ow unpigz files=1 \
     mode=taxa taxpath=${params.taxpath} \
-    tree=${params.taxpath}/tree.taxtree.gz files=1 ow unpigz \
-    minsize=300 prefilter autosize k=32,24 depth
+    tree=${params.taxpath}/tree.taxtree.gz
 	"""
 }
 
