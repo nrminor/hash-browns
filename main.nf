@@ -25,6 +25,7 @@ log.info	"""
 			BBSketch        : ${params.bbsketch}
 			Sylph           : ${params.sylph}
 			Sourmash        : ${params.sourmash}
+			Centrifuge      : Coming soon!
 
 			Run settings:
 			-----------------------------------
@@ -457,14 +458,14 @@ process SKETCH_NT_WITH_SYLPH {
 	path nt_db
 
 	output:
-	path "nt_c1000_k31.syldb"
+	path "nt_c100_k31.syldb"
 
 	when:
 	params.download_only == false && params.sylph == true
 
 	script:
 	"""
-	sylph sketch -t ${task.cpus} -k 31 -c 1000 -g ${nt_db} -o nt_c1000_k31
+	sylph sketch -t ${task.cpus} -k 31 -c 100 -g ${nt_db} -o nt_c1000_k31
 	"""
 
 }
@@ -510,8 +511,8 @@ process CLASSIFY_WITH_SYLPH {
 	cpus 8
 
 	input:
-	tuple val(sample_id), path(sample_sketches)
 	each path(nt_syldb)
+	tuple val(sample_id), path(sample_sketches)
 
 	output:
 	path "${sample_id}_sylph_results.tsv"
@@ -519,7 +520,7 @@ process CLASSIFY_WITH_SYLPH {
 	script:
 	"""
 	sylph profile \
-	-t ${task.cpus} --minimum-ani 80 --estimate-unknown -M 20 --read-seq-id 0.98 \
+	-t ${task.cpus} --minimum-ani 75 --estimate-unknown -M 20 --read-seq-id 0.80 \
 	${sample_sketches} ${nt_syldb} \
 	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv
 	"""
