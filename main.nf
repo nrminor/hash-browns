@@ -436,7 +436,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	comparesketch.sh -Xmx32g \
 	in=${fastq} out=${sample_id}_profiled.tsv \
 	tree=${params.taxpath}/tree.taxtree.gz taxa*.sketch \
-	k=32,24 mode=sequence level=1 format=3 records=1 printtaxa=t ow \
+	k=32,24 mode=sequence level=2 format=3 printtaxa=t ow sortbyani=t \
 	exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus && \
 	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > ${sample_id}.virus_only.bbmap_profiled.tsv
 	"""
