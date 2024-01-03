@@ -48,7 +48,7 @@ workflow {
 			.map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	} else {
 		ch_fastqs = Channel
-			.fromPath( "${params.fastq_dir}/**/*.fastq*" )
+			.fromPath( "${params.fastq_dir}/*.fastq*" )
 			.map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	}
     
@@ -400,7 +400,7 @@ process SKETCH_NT_WITH_BBSKETCH {
 	
 	script:
 	"""
-	bbsketch.sh \
+	bbsketch.sh -Xmx32g \
     in=${nt_fasta} \
     out=taxa.sketch \
     k=32,24 autosize=t depth=t minsize=300 \
@@ -433,12 +433,12 @@ process CLASSIFY_WITH_BBSKETCH {
 	
 	script:
 	"""
-	comparesketch.sh -Xmx${task.memory}g \
+	comparesketch.sh -Xmx32g \
 	in=${fastq} out=${sample_id}_profiled.tsv \
-	tree=${params.taxdir}/tree.taxtree.gz taxa*.sketch \
+	tree=${params.taxpath}/tree.taxtree.gz taxa*.sketch \
 	k=32,24 mode=sequence level=1 format=3 records=1 printtaxa=t ow \
 	exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus && \
-	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > 02_clean.virus_only.bbmap_profiled.tsv
+	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > ${sample_id}.virus_only.bbmap_profiled.tsv
 	"""
 }
 
@@ -457,16 +457,14 @@ process SKETCH_NT_WITH_SYLPH {
 	path nt_db
 
 	output:
-	tuple val(sample_id), path("nt_k31.syldb")
+	path "nt_k31.syldb"
 
 	when:
 	params.download_only == false && params.sylph == true
 
 	script:
 	"""
-	sylph sketch \
-	--threads ${task.cpus} -k 31 \
-	${nt_db} -o nt_k31
+	sylph sketch -t ${task.cpus} -k 31 -i -g ${nt_db} -o nt_k31
 	"""
 
 }
@@ -485,7 +483,7 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	tuple val(sample_id), path(reads)
 
 	output:
-	tuple val(sample_id), path("${sample_id}.sylsp")
+	tuple val(sample_id), path("${sample_id}*.sylsp")
 
 	when:
 	params.download_only == false && params.sylph == true
@@ -493,8 +491,8 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	script:
 	"""
 	sylph sketch \
-	--threads ${task.cpus} -k 31 --individual-records \
-	${reads} -o ${sample_id}
+	-t ${task.cpus} -k 31 --individual-records -o ${sample_id} \
+	${reads}
 	"""
 
 }
