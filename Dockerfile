@@ -35,7 +35,8 @@ RUN apt-get update && apt-get install -y \
     git \
     default-jre \
     python3.12 \
-    python3-pip && \
+    python3-pip \
+    nim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir /dependencies && \
@@ -56,6 +57,14 @@ RUN wget https://github.com/shenwei356/seqkit/releases/download/v2.1.0/seqkit_li
     chmod +x seqkit && \
     mv seqkit /usr/local/bin/ && \
     rm seqkit_linux_amd64.tar.gz
+
+# Install SeqFu
+RUN git clone https://github.com/telatin/seqfu2 \
+    cd seqfu2 \
+    nimble build \
+    cd .. \
+    mv seqfu2 /opt
+ENV PATH="${PATH}:/opt/seqfu2/bin"
 
 # Install BBMap
 RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_38.90.tar.gz && \
@@ -84,8 +93,14 @@ RUN git clone https://github.com/bluenote-1577/sylph && \
     cd sylph && \
     cargo install --path . --root /opt/.cargo
 
+# Install fastqc-rs
+RUN cargo install fastqc-rs --root /opt/.cargo
+
 # Install Sourmash
 RUN pip install sourmash==4.8.4
+
+# Install multiqc
+RUN pip install multiqc==1.19
 
 # Install Nextflow
 RUN curl -s https://get.nextflow.io | bash && \

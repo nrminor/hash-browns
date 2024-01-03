@@ -35,12 +35,17 @@ log.info	"""
 			[available cpus : ${params.available_cpus}]
 			[run date       : ${params.date}]
 
-			PLEASE NOTE:
-			Hash-Browns currently only supports Oxford Nanopore
-			long reads. Support for short reads may be added in
-			the future, though we recommend users consider using
-			nf-core/taxprofiler or nf-core/mag for profiling
-			short read datasets.
+			HASH-BROWNS DISCLAIMERS:
+			-----------------------------------
+			1) Hash-Browns currently only supports Oxford Nanopore
+			long reads.
+			2) By default, Hash-Browns looks for the bioinformatic
+			tools it depends on locally rather than pulling a container
+			or otherwise installing. To use a container, use the flag
+			`-profile docker` in your `nextflow run` command.
+			Alternatively, install Just with `cargo install just` from
+			the Rust toolchain and use the relevant recipe to ensure
+			all Hash-Brown dependencies are installed.
 			"""
 			.stripIndent()
 
@@ -577,8 +582,8 @@ process CLASSIFY_WITH_BBSKETCH {
 	"""
 	comparesketch.sh -Xmx32g \
 	in=${fastq} out=${sample_id}_profiled.tsv \
-	tree=${params.taxpath}/tree.taxtree.gz taxa*.sketch \
-	k=32,24 mode=sequence level=2 format=3 printtaxa=t ow sortbyani=t \
+	tree=${params.taxpath}/tree.taxtree.gz taxa.sketch \
+	k=32,24 level=1 format=3 records=1 printtaxa=t ow sortbyani=t \
 	exclude=1923094,Potexvirus,Virgaviridae,Bromoviridae,191289,Tymoviridae,Carlavirus && \
 	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > ${sample_id}.virus_only.bbmap_profiled.tsv
 	"""
@@ -621,7 +626,8 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus 2
+	cpus 3
+	memory 32.GB
 
 	input:
 	tuple val(sample_id), path(reads)
@@ -649,7 +655,8 @@ process CLASSIFY_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus 8
+	cpus 3
+	memory 32.GB
 
 	input:
 	each path(nt_syldb)
