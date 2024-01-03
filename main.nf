@@ -451,7 +451,7 @@ process SKETCH_NT_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus ${params.available_cpus}
+	cpus params.available_cpus
 
 	input:
 	path nt_db
