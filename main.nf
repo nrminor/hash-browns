@@ -571,7 +571,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	comparesketch.sh -Xmx32g \
 	in=${fastq} out=${sample_id}_profiled.tsv \
 	tree=${params.taxpath}/tree.taxtree.gz taxa.sketch \
-	k=32,24 level=1 format=3 records=1 printtaxa=t ow sortbyani=t && \
+	k=32,24 mode=sequence level=1 format=3 records=1 printtaxa=t ow sortbyani=t && \
 	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > ${sample_id}.virus_only.bbmap_profiled.tsv
 	"""
 }
