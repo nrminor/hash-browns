@@ -458,14 +458,14 @@ process SKETCH_NT_WITH_SYLPH {
 	path nt_db
 
 	output:
-	path "nt_c100_k31.syldb"
+	path "nt_c200_k31.syldb"
 
 	when:
 	params.download_only == false && params.sylph == true
 
 	script:
 	"""
-	sylph sketch -t ${task.cpus} -k 31 -c 100 -g ${nt_db} -o nt_c1000_k31
+	sylph sketch -t ${task.cpus} -k 31 -i -c 200 -g ${nt_db} -o nt_c200_k31
 	"""
 
 }
@@ -520,7 +520,7 @@ process CLASSIFY_WITH_SYLPH {
 	script:
 	"""
 	sylph profile \
-	-t ${task.cpus} --minimum-ani 75 --estimate-unknown -M 20 --read-seq-id 0.80 \
+	-t ${task.cpus} --minimum-ani 80 --estimate-unknown -M 3 --read-seq-id 0.80 \
 	${sample_sketches} ${nt_syldb} \
 	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv
 	"""
