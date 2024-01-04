@@ -207,7 +207,7 @@ process VALIDATE_SEQS {
 	"""
 	seqfu check \
 	--deep --thousands \
-	`realpath ${reads}` > ${sample_id}_seqfu_report.tsv
+	${reads} > ${sample_id}_seqfu_report.tsv
 	"""
 }
 
@@ -235,7 +235,7 @@ process READ_QC {
 
 	script:
 	"""
-	nanoq -i `realpath ${reads}` \
+	nanoq -i ${reads} \
 	--min-len 200 --min-qual 10 \
 	-r ${sample_id}_nanoq_report.txt \
 	> ${sample_id}_nanoq.fastq.gz
