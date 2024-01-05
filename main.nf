@@ -58,8 +58,8 @@ workflow {
 		.fromList( params.accession2taxid_urls )
 		.flatten()
 
-		ch_data_manifest = Channel
-			.fromPath( params.data_manifest )
+	ch_data_manifest = Channel
+		.fromPath( params.data_manifest )
 	
 	
 	// Workflow steps
@@ -79,7 +79,9 @@ workflow {
 		FASTQC_REPORT.out.multiqc_data.collect()
 	)
 
-	FETCH_FAST_MODE_DB ( )
+	FETCH_FAST_MODE_DB (
+		ch_data_manifest
+	)
 
 	FETCH_ACCESSION2TAXID (
 		ch_urls
@@ -693,15 +695,18 @@ process CLASSIFY_WITH_SYLPH {
 	tuple val(sample_id), path(sample_sketches)
 
 	output:
-	path "*"
+	path "${sample_id}*.tsv"
 
 	script:
 	"""
 	sylph profile \
 	-t ${task.cpus} --minimum-ani 90 --estimate-unknown -M 3 --read-seq-id 0.80 \
-	${sample_sketches} ${nt_syldb} > ${sample_id}_sylph_results.tsv && \
+	${sample_sketches} ${nt_syldb} > ${sample_id}_sylph_results.tsv
+
 	csvtk sort -t -k "5:nr" -l ${sample_id}_sylph_results.tsv \
-	| csvtk grep -t -f "Contig_name" -r -p "virus" -o ${sample_id}_sylph_virus_only_results.tsv
+	| csvtk grep -t --ignore-case -f "Contig_name" -r -p virus \
+	| csvtk grep -t --ignore-case -f "Contig_name" -r -p human \
+	-o ${sample_id}_sylph_human_virus_only_results.tsv
 	"""
 	
 }
