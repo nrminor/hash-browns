@@ -616,7 +616,6 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	maxRetries 1
 
 	cpus 3
-	memory 32.GB
 
 	input:
 	tuple val(sample_id), path(reads)
@@ -644,8 +643,7 @@ process CLASSIFY_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus 3
-	memory 32.GB
+	cpus params.available_cpus
 
 	input:
 	each path(nt_syldb)
@@ -657,9 +655,9 @@ process CLASSIFY_WITH_SYLPH {
 	script:
 	"""
 	sylph profile \
-	-t ${task.cpus} --minimum-ani 80 --estimate-unknown -M 3 --read-seq-id 0.80 \
+	-t ${task.cpus} --minimum-ani 90 --estimate-unknown -M 3 --read-seq-id 0.80 \
 	${sample_sketches} ${nt_syldb} \
-	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv
+	| csvtk sort -t -k "5:nr" -l > ${sample_id}_sylph_results.tsv
 	"""
 	
 }
