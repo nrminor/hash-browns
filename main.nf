@@ -652,14 +652,16 @@ process CLASSIFY_WITH_SYLPH {
 	tuple val(sample_id), path(sample_sketches)
 
 	output:
-	path "${sample_id}_sylph_results.tsv"
+	path "*"
 
 	script:
 	"""
 	sylph profile \
 	-t ${task.cpus} --minimum-ani 80 --estimate-unknown -M 3 --read-seq-id 0.80 \
 	${sample_sketches} ${nt_syldb} \
-	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv
+	| csvtk sort -t -k "13:nr" -l > ${sample_id}_sylph_results.tsv && \
+	csvtk grep -t -f "Contig_name" -p "virus" \
+	${sample_id}_sylph_results.tsv -o ${sample_id}_sylph_virus_only_results.tsv
 	"""
 	
 }
