@@ -172,6 +172,7 @@ seqs/
 sandbox/
 scratch/
 dev/
+resources/
 
 # nextflow directories and files
 .nextflow/

@@ -96,6 +96,9 @@ RUN git clone https://github.com/bluenote-1577/sylph && \
 # Install fastqc-rs
 RUN cargo install fastqc-rs --root /opt/.cargo
 
+# Install scidataflow
+RUN cargo install scidataflow --root /opt/.cargo
+
 # Install Sourmash
 RUN pip install sourmash==4.8.4
 

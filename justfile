@@ -27,6 +27,7 @@ rust:
     cargo install sylph
     cargo install fastqc-rs
     cargo install nanoq
+    cargo install scidataflow
 alias rs := rust
 
 # Install Python tools (currently assumes pip is already installed)

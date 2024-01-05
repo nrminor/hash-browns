@@ -29,6 +29,7 @@ log.info	"""
 
 			Run settings:
 			-----------------------------------
+			[fast_mode      : ${params.fast_mode}]
 			[realtime_dir   : ${params.realtime_dir}]
 			[cleanup        : ${params.cleanup}]
 			[download only? : ${params.download_only}]
@@ -56,6 +57,9 @@ workflow {
 	ch_urls = Channel
 		.fromList( params.accession2taxid_urls )
 		.flatten()
+
+		ch_data_manifest = Channel
+			.fromPath( params.data_manifest )
 	
 	
 	// Workflow steps
@@ -74,6 +78,8 @@ workflow {
 	MULTIQC_REPORT (
 		FASTQC_REPORT.out.multiqc_data.collect()
 	)
+
+	FETCH_FAST_MODE_DB ( )
 
 	FETCH_ACCESSION2TAXID (
 		ch_urls
@@ -112,17 +118,23 @@ workflow {
     //     SORT_BY_NAME.out
     // )
 
-    SKETCH_NT_WITH_BBSKETCH (
+    SKETCH_DB_WITH_BBSKETCH (
         FETCH_NT.out
+			.mix(
+				FETCH_FAST_MODE_DB.out
+			)
     )
 
     CLASSIFY_WITH_BBSKETCH (
         READ_QC.out,
-        SKETCH_NT_WITH_BBSKETCH.out.collect()
+        SKETCH_DB_WITH_BBSKETCH.out.collect()
     )
 
-	SKETCH_NT_WITH_SYLPH (
+	SKETCH_DB_WITH_SYLPH (
         FETCH_NT.out
+			.mix(
+				FETCH_FAST_MODE_DB.out
+			)
 	)
 
 	SKETCH_SAMPLE_WITH_SYLPH (
@@ -130,12 +142,15 @@ workflow {
 	)
 
 	CLASSIFY_WITH_SYLPH (
-		SKETCH_NT_WITH_SYLPH.out,
+		SKETCH_DB_WITH_SYLPH.out,
 		SKETCH_SAMPLE_WITH_SYLPH.out
 	)
 
-	SKETCH_NT_WITH_SOURMASH (
+	SKETCH_DB_WITH_SOURMASH (
 		FETCH_NT.out
+			.mix(
+				FETCH_FAST_MODE_DB.out
+			)
 	)
 
 	SKETCH_SAMPLE_WITH_SOURMASH (
@@ -144,7 +159,7 @@ workflow {
 
 	SOURMASH_GATHER (
 		SKETCH_SAMPLE_WITH_SOURMASH.out,
-		SKETCH_NT_WITH_SOURMASH.out
+		SKETCH_DB_WITH_SOURMASH.out
 	)
 	
 }
@@ -299,6 +314,28 @@ process MULTIQC_REPORT {
 
 }
 
+process FETCH_FAST_MODE_DB {
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	input:
+	path data_manifest
+
+	output:
+	path "human_virus_db.fa.gz"
+
+	when:
+	fast_mode == true
+
+	script:
+	"""
+	sdf pull --urls --overwrite && \
+	sdf status > ${params.date}_status_check.txt
+	"""
+
+}
+
 process FETCH_ACCESSION2TAXID {
 
 	storeDir params.taxpath
@@ -313,6 +350,9 @@ process FETCH_ACCESSION2TAXID {
 
 	output:
 	path "shrunk.${file_name}"
+
+	when:
+	params.fast_mode == false
 
 	script:
 	file_name = url.toString().split("/")[-1]
@@ -431,6 +471,9 @@ process FETCH_NT {
 	
 	output:
     path "nt.fa.gz"
+
+	when:
+	params.fast_mode == false
 	
 	script:
 	"""
@@ -514,7 +557,7 @@ process GI2TAXID {
 // 	"""
 // }
 
-process SKETCH_NT_WITH_BBSKETCH {
+process SKETCH_DB_WITH_BBSKETCH {
 	
 	/* */
 
@@ -578,7 +621,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	"""
 }
 
-process SKETCH_NT_WITH_SYLPH {
+process SKETCH_DB_WITH_SYLPH {
 	
 	/* */
 
@@ -656,15 +699,14 @@ process CLASSIFY_WITH_SYLPH {
 	"""
 	sylph profile \
 	-t ${task.cpus} --minimum-ani 90 --estimate-unknown -M 3 --read-seq-id 0.80 \
-	${sample_sketches} ${nt_syldb} \
-	| csvtk sort -t -k "5:nr" -l > ${sample_id}_sylph_results.tsv && \
-	csvtk grep -t -f "Contig_name" -p "virus" \
-	${sample_id}_sylph_results.tsv -o ${sample_id}_sylph_virus_only_results.tsv
+	${sample_sketches} ${nt_syldb} > ${sample_id}_sylph_results.tsv && \
+	csvtk sort -t -k "5:nr" -l ${sample_id}_sylph_results.tsv \
+	| csvtk grep -t -f "Contig_name" -r -p "virus" -o ${sample_id}_sylph_virus_only_results.tsv
 	"""
 	
 }
 
-process SKETCH_NT_WITH_SOURMASH {
+process SKETCH_DB_WITH_SOURMASH {
 	
 	/* */
 
