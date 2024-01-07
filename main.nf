@@ -8,6 +8,7 @@ nextflow.enable.dsl = 2
 // --------------------------------------------------------------- //
 
 // prints to the screen and to the log
+// https://patorjk.com/software/taag/#p=testall&t=HASH-BROWNS
 log.info	"""
 
 			=======================================================================================================================
