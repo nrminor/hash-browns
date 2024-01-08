@@ -28,7 +28,6 @@ log.info	"""
 			===================================
 			fastq_dir       : ${params.fastq_dir}
 			results_dir     : ${params.results}
-			query_fasta     : ${params.query_fasta}
 
 			Storage directories:
 			-----------------------------------
@@ -208,6 +207,9 @@ params.sylph_classifications = params.sylph_results + "/classifications"
 params.sourmash_results = params.results + "/sourmash"
 params.sourmash_sketches = params.sourmash_results + "/sketches"
 params.sourmash_classifications = params.sourmash_results + "/classifications"
+
+// CPUs to use when sharing
+params.shared_cpus = Math.floor( params.available_cpus / 2 )
 
 // --------------------------------------------------------------- //
 
@@ -676,7 +678,7 @@ process SKETCH_SAMPLE_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus 3
+	cpus 4
 
 	input:
 	tuple val(sample_id), path(reads)
@@ -704,7 +706,7 @@ process CLASSIFY_WITH_SYLPH {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	cpus params.available_cpus
+	cpus params.shared_cpus
 
 	input:
 	each path(nt_syldb)
