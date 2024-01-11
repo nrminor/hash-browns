@@ -12,4 +12,4 @@ A few points to take note of:
    - Alternatively, if you're using a MacOS machine, a recipe in the provided `justfile` will install all Hash-Browns dependencies locally so you can use it without Docker overhead. To invoke the recipe, make sure [the Rust toolchain](https://www.rust-lang.org/tools/install) is installed, run `cargo install just`, and then run `just mac` in the same directory as the `justfile`. Read more about `just` at [https://just.systems/](https://just.systems/).
 3. **Hash-Browns currently only supports Oxford Nanopore long reads**. We recommend users look into [nf-core/taxprofiler](https://nf-co.re/taxprofiler) or [nf-core/mag](https://nf-co.re/mag) for short read applications, though we may add support for short reads in the future.
 
-* - If you must know, HASH-BROWNS is short for **H**igh-throughput **A**mplified **S**equence **H**ash **B**ioinformatics for **R**ealtime **O**xford **N**anopore **W**eighted **N**o-bias **S**ketching
+\* If you must know, HASH-BROWNS is short for **H**igh-throughput **A**mplified **S**equence **H**ash **B**ioinformatics for **R**ealtime **O**xford **N**anopore **W**eighted **N**o-bias **S**ketching
