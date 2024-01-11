@@ -62,11 +62,15 @@ workflow {
 	if ( params.realtime_dir ) {
 		ch_fastqs = Channel
 			.watchPath( "${params.realtime_dir}/**/*.fastq*", 'create,modify' )
+			.map { fastq -> tuple( file(fastq), file(fastq).countFastq() ) }
+			.filter { it[1] >= 20 }
 			.map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	} else {
 		ch_fastqs = Channel
 			.fromPath( "${params.fastq_dir}/*.fastq*" )
-			.map { fastq -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
+			.map { fastq -> tuple( file(fastq), file(fastq).countFastq() ) }
+			.filter { it[1] >= 20 }
+			.map { fastq, count -> tuple( file(fastq).getSimpleName(), file(fastq) ) }
 	}
     
 	ch_urls = Channel
@@ -751,7 +755,7 @@ process SKETCH_DB_WITH_SOURMASH {
 
 	script:
 	"""
-	sourmash sketch dna -p k=31,scaled=1000,abund -f -o nt_k31.sig.gz ${nt_db}
+	sourmash sketch dna -p k=31,k=51,scaled=1000,abund --singleton -f -o nt_k31.sig.gz ${nt_db}
 	"""
 
 }
@@ -770,15 +774,14 @@ process SKETCH_SAMPLE_WITH_SOURMASH {
 	tuple val(sample_id), path(reads)
 
 	output:
-	tuple val(sample_id), path("${sample_id}_reads.sig"), path("${sample_id}_reads.sbt.zip")
+	tuple val(sample_id), path("${sample_id}_reads.sig")
 
 	when:
 	params.download_only == false && params.sourmash == true
 
 	script:
 	"""
-	sourmash sketch dna -p scaled=1000,k=31 ${reads} -o ${sample_id}_reads.sig && \
-	sourmash index ${sample_id}_reads ${sample_id}_reads.sig
+	sourmash sketch dna -p scaled=1000,k=31,k=51 ${reads} -o ${sample_id}_reads.sig
 	"""
 
 }
@@ -788,23 +791,28 @@ process SOURMASH_GATHER {
 	/* */
 	
 	tag "${sample_id}"
-	publishDir params.sourmash_sketches, mode: 'copy', overwrite: true
+	publishDir params.sourmash_classifications, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
+	cpus params.available_cpus
+
 	input:
-	tuple val(sample_id), path(sample_sigs), path(index)
+	tuple val(sample_id), path(sample_sigs)
 	each path(nt_sigs)
 
 	output:
+	path "*"
 
 	when:
 	params.download_only == false && params.sourmash == true
 
 	script:
 	"""
-	sourmash gather -p abund ${nt_sigs} ${sample_sigs} -o ${sample_id}_sourmash_results.csv
+	sourmash gather \
+	--prefetch --estimate-ani-ci --create-empty-results -k 31 \
+	${sample_sigs} ${nt_sigs} -o ${sample_id}_sourmash_results.csv
 	"""
 
 }
