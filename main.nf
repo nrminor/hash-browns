@@ -346,7 +346,7 @@ process FETCH_FAST_MODE_DB {
 	path data_manifest
 
 	output:
-	path "human_virus_db.fa.gz"
+	path "resources/human_virus_db.fa.gz"
 
 	when:
 	params.fast_mode == true
