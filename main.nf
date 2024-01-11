@@ -10,7 +10,6 @@ nextflow.enable.dsl = 2
 // prints to the screen and to the log
 // https://patorjk.com/software/taag/#p=testall&t=HASH-BROWNS
 log.info	"""
-
 			=======================================================================================================================
 			=  ====  =====  ======      ===  ====  ============      ====       =====    ====  ====  ====  ==  =======  ===      ==
 			=  ====  ====    ====  ====  ==  ====  ============  ===  ===  ====  ===  ==  ===  ====  ====  ==   ======  ==  ====  =
@@ -350,7 +349,7 @@ process FETCH_FAST_MODE_DB {
 	path "human_virus_db.fa.gz"
 
 	when:
-	fast_mode == true
+	params.fast_mode == true
 
 	script:
 	"""
@@ -637,11 +636,15 @@ process CLASSIFY_WITH_BBSKETCH {
 	"""
 	seqkit seq -v ${fastq} \
 	| comparesketch.sh -Xmx32g \
-	in=stdin.fastq out=${sample_id}_profiled.tsv \
+	in=stdin.fastq out=${sample_id}.bbsketch.tsv \
 	tree=${params.taxpath}/tree.taxtree.gz taxa.sketch \
 	k=32,24 mode=sequence level=1 format=3 records=1 ow sortbyani=t \
-	printtaxa=t printdepth=t sortbydepth=t printunique=t printunique2=t && \
-	cat ${sample_id}_profiled.tsv | awk 'NR==1 || /virus/' > ${sample_id}.virus_only.bbmap_profiled.tsv
+	printtaxa=t printdepth=t sortbydepth=t printunique=t printunique2=t
+
+	csvtk sort -t -k "3:nr" -l ${sample_id}.bbsketch.tsv \
+	| csvtk grep -t --ignore-case -f "Ref" -r -p virus \
+	| csvtk grep -t --ignore-case -f "Ref" -r -p human \
+	-o ${sample_id}human_virus_only.bbsketch.tsv.tsv
 	"""
 }
 
