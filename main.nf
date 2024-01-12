@@ -140,21 +140,26 @@ workflow {
 
     SKETCH_DB_WITH_BBSKETCH (
         FETCH_NT.out
-			.mix(
-				FETCH_FAST_MODE_DB.out
-			)
     )
+
+	SKETCH_FAST_DB_WITH_BBSKETCH (
+		FETCH_FAST_MODE_DB.out
+	)
 
     CLASSIFY_WITH_BBSKETCH (
         READ_QC.out,
         SKETCH_DB_WITH_BBSKETCH.out.collect()
+			.mix(
+				SKETCH_FAST_DB_WITH_BBSKETCH.out
+			)
     )
 
 	SKETCH_DB_WITH_SYLPH (
         FETCH_NT.out
-			.mix(
-				FETCH_FAST_MODE_DB.out
-			)
+	)
+
+	SKETCH_FAST_DB_WITH_SYLPH (
+		FETCH_FAST_MODE_DB.out
 	)
 
 	SKETCH_SAMPLE_WITH_SYLPH (
@@ -162,15 +167,19 @@ workflow {
 	)
 
 	CLASSIFY_WITH_SYLPH (
-		SKETCH_DB_WITH_SYLPH.out,
+		SKETCH_DB_WITH_SYLPH.out
+			.mix(
+				SKETCH_FAST_DB_WITH_SYLPH.out
+			),
 		SKETCH_SAMPLE_WITH_SYLPH.out
 	)
 
 	SKETCH_DB_WITH_SOURMASH (
 		FETCH_NT.out
-			.mix(
-				FETCH_FAST_MODE_DB.out
-			)
+	)
+
+	SKETCH_FAST_DB_WITH_SOURMASH (
+		FETCH_FAST_MODE_DB.out
 	)
 
 	SKETCH_SAMPLE_WITH_SOURMASH (
@@ -180,6 +189,9 @@ workflow {
 	SOURMASH_GATHER (
 		SKETCH_SAMPLE_WITH_SOURMASH.out,
 		SKETCH_DB_WITH_SOURMASH.out
+			.mix(
+				SKETCH_FAST_DB_WITH_SOURMASH.out
+			)
 	)
 	
 }
@@ -580,6 +592,38 @@ process GI2TAXID {
 // 	"""
 // }
 
+process SKETCH_FAST_DB_WITH_BBSKETCH {
+	
+	/* */
+
+	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	memory 32.GB
+	
+	input:
+	path fast_db
+	
+	output:
+	path "human_virus_taxa.sketch"
+
+	when:
+	params.fast_mode == true
+	
+	script:
+	"""
+	bbsketch.sh -Xmx32g \
+    in=`realpath ${fast_db}` \
+    out=human_virus_taxa.sketch \
+    k=32,24 autosize=t depth=t minsize=300 \
+    prefilter=t tossjunk=t ow unpigz files=1 \
+    mode=taxa taxpath=${params.taxpath} \
+    tree=${params.taxpath}/tree.taxtree.gz
+	"""
+}
+
 process SKETCH_DB_WITH_BBSKETCH {
 	
 	/* */
@@ -598,7 +642,7 @@ process SKETCH_DB_WITH_BBSKETCH {
 	path "taxa*.sketch"
 
 	when:
-	params.download_only == false && params.bbsketch == true
+	params.download_only == false && params.fast_mode == false && params.bbsketch == true
 	
 	script:
 	"""
@@ -666,11 +710,38 @@ process SKETCH_DB_WITH_SYLPH {
 	path "nt_c200_k31.syldb"
 
 	when:
-	params.download_only == false && params.sylph == true
+	params.download_only == false && params.fast_mode == false && params.sylph == true
 
 	script:
 	"""
 	sylph sketch -t ${task.cpus} -k 31 -i -c 200 -g ${nt_db} -o nt_c200_k31
+	"""
+
+}
+
+process SKETCH_FAST_DB_WITH_SYLPH {
+	
+	/* */
+
+	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	cpus params.available_cpus
+
+	input:
+	path fast_db
+
+	output:
+	path "human_virus_c200_k31.syldb"
+
+	when:
+	params.fast_mode == true
+
+	script:
+	"""
+	sylph sketch -t ${task.cpus} -k 31 -i -c 200 -g ${fast_db} -o human_virus_c200_k31
 	"""
 
 }
@@ -754,11 +825,40 @@ process SKETCH_DB_WITH_SOURMASH {
 	path "nt_k31.sig.gz"
 
 	when:
-	params.download_only == false && params.sourmash == true
+	params.download_only == false && params.fast_mode == false && params.sourmash == true
 
 	script:
 	"""
 	sourmash sketch dna -p k=31,k=51,scaled=1000,abund --singleton -f -o nt_k31.sig.gz ${nt_db}
+	"""
+
+}
+
+process SKETCH_FAST_DB_WITH_SOURMASH {
+	
+	/* */
+
+	storeDir params.nt_storedir
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 
+	
+	memory 100.GB
+
+	input:
+	path fast_db
+
+	output:
+	path "human_virus_k31.sig.gz"
+
+	when:
+	params.fast_mode == true
+
+	script:
+	"""
+	sourmash sketch dna \
+	-p k=31,k=51,scaled=1000,abund --singleton -f \
+	-o human_virus_k31.sig.gz ${fast_db}
 	"""
 
 }
