@@ -79,7 +79,6 @@ workflow {
 	ch_data_manifest = Channel
 		.fromPath( params.data_manifest )
 	
-	
 	// Workflow steps
 	VALIDATE_SEQS (
 		ch_fastqs
@@ -202,6 +201,15 @@ workflow {
 // DERIVATIVE PARAMETER SPECIFICATION
 // --------------------------------------------------------------- //
 // Additional parameters that are derived from parameters set in nextflow.config
+
+// select all tools
+if params.all == true {
+	params.bbsketch = true
+	params.sylph = true
+	params.sourmash = true
+}
+
+// preprocessing results
 params.preprocessing = params.results + "/preprocessing"
 params.read_checks = params.preprocessing + "/1_read_checks"
 params.filtered = params.preprocessing + "/2_filtered_reads"
