@@ -610,7 +610,7 @@ process SKETCH_FAST_DB_WITH_BBSKETCH {
 	path "human_virus_taxa.sketch"
 
 	when:
-	params.fast_mode == true
+	params.download_only == false && params.fast_mode == true && params.bbsketch == true
 	
 	script:
 	"""
@@ -737,7 +737,7 @@ process SKETCH_FAST_DB_WITH_SYLPH {
 	path "human_virus_c200_k31.syldb"
 
 	when:
-	params.fast_mode == true
+	params.download_only == false && params.fast_mode == true && params.sylph == true
 
 	script:
 	"""
@@ -852,7 +852,7 @@ process SKETCH_FAST_DB_WITH_SOURMASH {
 	path "human_virus_k31.sig.gz"
 
 	when:
-	params.fast_mode == true
+	params.download_only == false && params.fast_mode == true && params.sourmash == true
 
 	script:
 	"""
