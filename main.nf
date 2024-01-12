@@ -681,7 +681,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	seqkit seq -v ${fastq} \
 	| comparesketch.sh -Xmx32g \
 	in=stdin.fastq out=${sample_id}.bbsketch.tsv \
-	tree=${params.taxpath}/tree.taxtree.gz taxa.sketch \
+	tree=${params.taxpath}/tree.taxtree.gz *.sketch \
 	k=32,24 mode=sequence level=1 format=3 records=1 ow sortbyani=t \
 	printtaxa=t printdepth=t sortbydepth=t printunique=t printunique2=t
 
