@@ -203,7 +203,7 @@ workflow {
 // Additional parameters that are derived from parameters set in nextflow.config
 
 // select all tools
-if params.all == true {
+if ( params.all == true ) {
 	params.bbsketch = true
 	params.sylph = true
 	params.sourmash = true
