@@ -12,7 +12,7 @@ process SOURMASH_DB_SKETCH {
 	path "*.sig.gz"
 
 	when:
-	params.tools.contains("sourmash") || params.all || params.sourmash
+	(params.tools && params.tools.contains("sourmash")) || params.all || params.sourmash
 
 	script:
 	def ref_prefix = file(fasta_db)
@@ -45,7 +45,7 @@ process SOURMASH_INDEX {
 	path "*.rocksdb"
 
 	when:
-	params.tools.contains("sourmash") || params.all || params.sourmash
+	(params.tools && params.tools.contains("sourmash")) || params.all || params.sourmash
 
 	script:
 	def ref_prefix = file(fasta_db).getBaseName()
@@ -68,7 +68,7 @@ process SOURMASH_TAX_PREPARE {
 	path "*"
 
 	when:
-	params.tools.contains("sourmash") || params.all || params.sourmash
+	(params.tools && params.tools.contains("sourmash")) || params.all || params.sourmash
 
 	script:
 	"""
@@ -92,10 +92,7 @@ process SOURMASH_SKETCH_SAMPLE {
 	tuple val(sample_id), path("${sample_id}_reads.sig")
 
 	when:
-	params.tools.contains("sourmash") || params.all || params.sourmash
-
-	when:
-	params.download_only == false && params.sourmash == true
+	(params.tools && params.tools.contains("sourmash")) || params.all || params.sourmash
 
 	script:
 	"""
@@ -119,7 +116,7 @@ process SOURMASH_GATHER {
 	tuple val(sample_id), path("${sample_id}_sourmash_results.csv")
 
 	when:
-	params.tools.contains("sourmash") || params.all || params.sourmash
+	(params.tools && params.tools.contains("sourmash")) || params.all || params.sourmash
 
 	script:
 	"""
@@ -145,7 +142,7 @@ process SOURMASH_TAX_METAGENOME {
 	path "*"
 
 	when:
-	params.tools.contains("sourmash") || params.all || params.sourmash
+	(params.tools && params.tools.contains("sourmash")) || params.all || params.sourmash
 
 	script:
 	"""

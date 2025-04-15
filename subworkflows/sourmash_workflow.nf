@@ -24,7 +24,7 @@ workflow SOURMASH_WORKFLOW {
 
     ch_all_dbs = SOURMASH_DB_SKETCH.out.mix(ch_sourmash_k51).mix(ch_sourmash_k31).mix(ch_sourmash_k21)
 
-    SOURMASH_GATHER(SOURMASH_SKETCH_SAMPLE.combine(ch_all_dbs))
+    SOURMASH_GATHER(SOURMASH_SKETCH_SAMPLE.out.combine(ch_all_dbs))
 
     SOURMASH_TAX_METAGENOME(
         SOURMASH_GATHER.out.combine(ch_sourmash_taxonomy)

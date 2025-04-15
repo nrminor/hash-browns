@@ -3313,7 +3313,7 @@ packages:
 - pypi: .
   name: hash-browns
   version: 0.1.0
-  sha256: 559983c8ed42fd916ced2ed0ee618df9b12cf8ef7bdc618ca7c269274852c9a3
+  sha256: cee3ebb47adc6bc657b4488e7e8d714ff4f1810f9397801307973cba3839f87c
   requires_dist:
   - biopython>=1.85
   - loguru>=0.7.3

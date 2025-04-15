@@ -1,8 +1,8 @@
 process GOTTCHA2_PROFILE_NANOPORE {
 
     tag "${sample_id}"
-    publishDir params.gottcha_sam, mode: 'copy', overwrite: false, pattern: "*.sam"
-    publishDir params.gottcha_stats, mode: 'copy', overwrite: false, pattern: "*.tsv"
+    // publishDir params.gottcha_sam, mode: 'copy', overwrite: false, pattern: "*.sam"
+    // publishDir params.gottcha_stats, mode: 'copy', overwrite: false, pattern: "*.tsv"
 
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
 
@@ -16,8 +16,8 @@ process GOTTCHA2_PROFILE_NANOPORE {
     tuple val(sample_id), path("${sample_id}*.full.tsv"), path(ref_db), emit: full_tsv
     path "*.tsv", emit: all_stats
 
-	when:
-	params.tools.contains("gottcha2") || params.tools.contains("gottcha") || params.all || params.gottcha2
+    when:
+    (params.tools && params.tools.contains("gottcha2") || params.tools.contains("gottcha")) || params.all || params.gottcha2
 
     script:
     def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
@@ -34,8 +34,8 @@ process GOTTCHA2_PROFILE_NANOPORE {
 process GOTTCHA2_PROFILE_ILLUMINA {
 
     tag "${sample_id}"
-    publishDir params.gottcha_sam, mode: 'copy', overwrite: false, pattern: "*.sam"
-    publishDir params.gottcha_stats, mode: 'copy', overwrite: false, pattern: "*.tsv"
+    // publishDir params.gottcha_sam, mode: 'copy', overwrite: false, pattern: "*.sam"
+    // publishDir params.gottcha_stats, mode: 'copy', overwrite: false, pattern: "*.tsv"
 
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
 
@@ -49,8 +49,8 @@ process GOTTCHA2_PROFILE_ILLUMINA {
     tuple val(sample_id), path("${sample_id}*.full.tsv"), path(ref_db), emit: full_tsv
     path "*.tsv", emit: all_stats
 
-	when:
-	params.tools.contains("gottcha2") || params.tools.contains("gottcha") || params.all || params.gottcha2
+    when:
+    (params.tools && params.tools.contains("gottcha2") || params.tools.contains("gottcha")) || params.all || params.gottcha2
 
     script:
     def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
@@ -66,7 +66,7 @@ process GOTTCHA2_PROFILE_ILLUMINA {
 process GENERATE_FASTA {
 
     tag "${sample_id}"
-    publishDir params.gottcha_fasta, mode: 'copy', overwrite: false, pattern: "*.fasta"
+    // publishDir params.gottcha_fasta, mode: 'copy', overwrite: false, pattern: "*.fasta"
 
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
 
@@ -78,10 +78,10 @@ process GENERATE_FASTA {
     output:
     path "*"
 
-    script:
+    when:
+    (params.tools && params.tools.contains("gottcha2") || params.tools.contains("gottcha")) || params.all || params.gottcha
 
-	when:
-	params.tools.contains("gottcha2") || params.tools.contains("gottcha") || params.all || params.gottcha2
+    script:
     def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
     """
     gottcha2.py \

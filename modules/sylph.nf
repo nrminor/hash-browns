@@ -16,7 +16,7 @@ process SYLPH_SKETCH_DB {
 	path "*.syldb"
 
 	when:
-	params.tools.contains("sylph") || params.all || params.sylph
+	(params.tools && params.tools.contains("sylph")) || params.all || params.sylph
 
 	script:
 	"""
@@ -45,7 +45,7 @@ process SYLPH_SKETCH_SAMPLE {
 	tuple val(sample_id), path("${sample_id}*.sylsp")
 
 	when:
-	params.tools.contains("sylph") || params.all || params.sylph
+	(params.tools && params.tools.contains("sylph")) || params.all || params.sylph
 
 	script:
 	"""
@@ -58,7 +58,6 @@ process CLASSIFY_WITH_SYLPH {
 	/* */
 
 	tag "${sample_id}"
-	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
@@ -70,7 +69,7 @@ process CLASSIFY_WITH_SYLPH {
 	tuple val(sample_id), path("${sample_id}*.tsv")
 
 	when:
-	params.tools.contains("sylph") || params.all || params.sylph
+	(params.tools && params.tools.contains("sylph")) || params.all || params.sylph
 
 	script:
 	"""
@@ -82,20 +81,21 @@ process CLASSIFY_WITH_SYLPH {
 
 process SYLPH_TAX_DOWNLOAD {
 
-	storeDir params.db_cache
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
 	output:
-	path "tax_tsvs"
+	val "ready"
 
 	when:
-	params.tools.contains("sylph") || params.all || params.sylph
+	(params.tools && params.tools.contains("sylph")) || params.all || params.sylph
 
 	script:
 	"""
-	sylph-tax download --download-to tax_tsvs/
+	if [ ! -d ${params.sylph_tax_dir} ]; then
+		mkdir -p ${params.sylph_tax_dir}
+	fi
+	sylph-tax download --download-to ${params.sylph_tax_dir}
 	"""
 }
 
@@ -104,13 +104,12 @@ process SYLPH_TAXPROF {
 	/* */
 
 	tag "${sample_id}"
-	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
 	input:
-	tuple val(sample_id), path(tsv_dir), path(tax_tsvs)
+	tuple val(sample_id), path(tsv_dir), val(ready)
 
 	script:
 	"""
@@ -123,7 +122,6 @@ process EXTRACT_HUMAN_VIRUSES {
 	/* */
 
 	tag "${sample_id}"
-	publishDir params.sylph_classifications, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
@@ -135,7 +133,7 @@ process EXTRACT_HUMAN_VIRUSES {
 	tuple val(sample_id), "*.tsv"
 
 	when:
-	params.tools.contains("sylph") || params.all || params.sylph
+	(params.tools && params.tools.contains("sylph")) || params.all || params.sylph
 
 	script:
 	"""
