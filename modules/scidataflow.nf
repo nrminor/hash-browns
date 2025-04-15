@@ -17,7 +17,7 @@ process FETCH_MANIFEST_DATABASES {
 	path "*gottcha_db.species.*", emit: gottcha_db
 
 	when:
-	params.download && !params.download_only
+	params.download || params.download_only
 
 	script:
 	"""

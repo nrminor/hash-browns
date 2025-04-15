@@ -1,3 +1,31 @@
+process MERGE_PAIRS {
+
+	/* */
+
+	tag "${sample_id}"
+
+	errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
+	maxRetries 2
+
+	cpus 4
+
+	input:
+	tuple val(sample_id), path(reads1), path(reads2)
+
+	output:
+	tuple val(sample_id), val("illumina"), path("${sample_id}.merged.fastq.gz")
+
+	script:
+	"""
+	bbmerge.sh \
+	in=`realpath ${reads1}` \
+	in2=`realpath ${reads2}` \
+	out=${sample_id}.merged.fastq.gz \
+	outu=${sample_id}.unmerged.fastq.gz \
+	threads=${task.cpus} \
+	-eoom
+	"""
+}
 process FETCH_ACCESSION2TAXID {
 
 	storeDir params.taxpath
@@ -22,7 +50,6 @@ process FETCH_ACCESSION2TAXID {
 	wget -q -O - ${url} \
 	| shrinkaccession.sh in=stdin.txt.gz out=shrunk.${file_name} zl=9 t=${task.cpus}
 	"""
-
 }
 
 
@@ -45,7 +72,6 @@ process CONSTRUCT_TAX_TREE {
 	"""
 	taxtree.sh names.dmp nodes.dmp merged.dmp tree.taxtree.gz -Xmx16g
 	"""
-
 }
 
 process CONSTRUCT_GITABLE {
@@ -60,14 +86,13 @@ process CONSTRUCT_GITABLE {
 
 	output:
 	path "gitable.int1d.gz"
-	
+
 	script:
 	"""
 	gitable.sh \
 	shrunk.dead_nucl.accession2taxid.gz,shrunk.dead_prot.accession2taxid.gz,shrunk.dead_wgs.accession2taxid.gz,shrunk.nucl_gb.accession2taxid.gz,shrunk.nucl_wgs.accession2taxid.gz,shrunk.pdb.accession2taxid.gz,shrunk.prot.accession2taxid.gz \
 	gitable.int1d.gz
 	"""
-
 }
 
 process ANALYZE_ACCESSIONS {
@@ -87,24 +112,23 @@ process ANALYZE_ACCESSIONS {
 	"""
 	analyzeaccession.sh shrunk.*.accession2taxid.gz out=patterns.txt
 	"""
-
 }
 
 process FETCH_NT {
-	
+
 	/* */
 
 	storeDir params.nt_storedir
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
-	
+
 	output:
-    path "nt.fa.gz"
+	path "nt.fa.gz"
 
 	when:
 	params.fast_mode == false
-	
+
 	script:
 	"""
 	wget -q -O - ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nt.gz \
@@ -116,7 +140,7 @@ process FETCH_NT {
 }
 
 process GI2TAXID {
-	
+
 	/* */
 
 	storeDir params.nt_storedir
@@ -126,10 +150,10 @@ process GI2TAXID {
 
 	input:
 	path nt
-	
+
 	output:
-    path "nt.fa.gz"
-	
+	path "nt.fa.gz"
+
 	script:
 	"""
 	gi2taxid.sh -Xmx1g \
@@ -140,7 +164,7 @@ process GI2TAXID {
 }
 
 // process SORT_BY_NAME {
-	
+
 // 	/* */
 
 // 	storeDir params.nt_storedir
@@ -149,14 +173,14 @@ process GI2TAXID {
 // 	maxRetries 1
 
 // 	memory 64.GB
-	
+
 // 	input:
 // 	path nt_fasta
 // 	path taxtree
-	
+
 // 	output:
 // 	path "nt_sorted.fa.gz"
-	
+
 // 	script:
 // 	"""
 // 	sortbyname.sh -Xmx64g \
@@ -167,18 +191,18 @@ process GI2TAXID {
 // }
 
 // process SKETCH_BLACKLIST {
-	
+
 // 	/* */
-	
+
 // 	tag "${tag}"
 // 	publishDir params.results, mode: 'copy'
-	
+
 // 	input:
 // 	path nt_sorted
-	
+
 // 	output:
 // 	path "blacklist_nt_genus_100.sketch"
-	
+
 // 	script:
 // 	"""
 // 	sketchblacklist.sh -Xmx31g \
@@ -188,7 +212,7 @@ process GI2TAXID {
 // }
 
 process SKETCH_FAST_DB_WITH_BBSKETCH {
-	
+
 	/* */
 
 	storeDir params.nt_storedir
@@ -197,16 +221,16 @@ process SKETCH_FAST_DB_WITH_BBSKETCH {
 	maxRetries 1
 
 	memory 32.GB
-	
+
 	input:
 	path fast_db
-	
+
 	output:
 	path "human_virus_taxa.sketch"
 
 	when:
 	params.download_only == false && params.fast_mode == true && params.bbsketch == true
-	
+
 	script:
 	"""
 	bbsketch.sh -Xmx32g \
@@ -220,7 +244,7 @@ process SKETCH_FAST_DB_WITH_BBSKETCH {
 }
 
 process SKETCH_DB_WITH_BBSKETCH {
-	
+
 	/* */
 
 	storeDir params.nt_storedir
@@ -229,16 +253,16 @@ process SKETCH_DB_WITH_BBSKETCH {
 	maxRetries 1
 
 	memory 32.GB
-	
+
 	input:
 	path nt_fasta
-	
+
 	output:
 	path "taxa*.sketch"
 
 	when:
 	params.download_only == false && params.fast_mode == false && params.bbsketch == true
-	
+
 	script:
 	"""
 	bbsketch.sh -Xmx32g \
@@ -252,9 +276,9 @@ process SKETCH_DB_WITH_BBSKETCH {
 }
 
 process CLASSIFY_WITH_BBSKETCH {
-	
+
 	/* */
-	
+
 	tag "${sample_id}"
 	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
 
@@ -263,14 +287,14 @@ process CLASSIFY_WITH_BBSKETCH {
 
 	cpus 3
 	memory 32.GB
-	
+
 	input:
-    tuple val(sample_id), path(fastq)
+	tuple val(sample_id), path(fastq)
 	each path(nt_sketches)
-	
+
 	output:
 	path "*"
-	
+
 	script:
 	"""
 	seqkit seq -v ${fastq} \

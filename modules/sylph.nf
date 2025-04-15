@@ -15,6 +15,9 @@ process SYLPH_SKETCH_DB {
 	output:
 	path "*.syldb"
 
+	when:
+	params.tools.contains("sylph") || params.all || params.sylph
+
 	script:
 	"""
 	sylph sketch -t ${task.cpus} -k 31 -i -c 200 -g ${input_db} -o ${input_db}.syldb
@@ -41,6 +44,9 @@ process SYLPH_SKETCH_SAMPLE {
 	output:
 	tuple val(sample_id), path("${sample_id}*.sylsp")
 
+	when:
+	params.tools.contains("sylph") || params.all || params.sylph
+
 	script:
 	"""
 	sylph sketch -t ${task.cpus} -k ${params.k} -c 100 -r ${reads} -o ${sample_id}
@@ -61,7 +67,10 @@ process CLASSIFY_WITH_SYLPH {
 	tuple val(sample_id), path(sample_sketches), path(syldb)
 
 	output:
-	path "${sample_id}*.tsv"
+	tuple val(sample_id), path("${sample_id}*.tsv")
+
+	when:
+	params.tools.contains("sylph") || params.all || params.sylph
 
 	script:
 	"""
@@ -79,11 +88,14 @@ process SYLPH_TAX_DOWNLOAD {
 	maxRetries 1
 
 	output:
-	path "*"
+	path "tax_tsvs"
+
+	when:
+	params.tools.contains("sylph") || params.all || params.sylph
 
 	script:
 	"""
-	sylph-tax download --download-to .
+	sylph-tax download --download-to tax_tsvs/
 	"""
 }
 
@@ -98,7 +110,7 @@ process SYLPH_TAXPROF {
 	maxRetries 1
 
 	input:
-	tuple val(sample_id), path(tsv_dir)
+	tuple val(sample_id), path(tsv_dir), path(tax_tsvs)
 
 	script:
 	"""
@@ -121,6 +133,9 @@ process EXTRACT_HUMAN_VIRUSES {
 
 	output:
 	tuple val(sample_id), "*.tsv"
+
+	when:
+	params.tools.contains("sylph") || params.all || params.sylph
 
 	script:
 	"""

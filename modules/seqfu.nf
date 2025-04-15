@@ -1,10 +1,10 @@
 process VALIDATE_SEQS {
 
-    /*
+	/*
     */
 
 	tag "${sample_id}"
-    label "general"
+	label "general"
 	publishDir params.read_checks, pattern: "*.tsv", mode: 'copy', overwrite: true
 
 	errorStrategy 'ignore'
@@ -12,10 +12,10 @@ process VALIDATE_SEQS {
 	cpus 1
 
 	input:
-	tuple val(sample_id), path(reads)
+	tuple val(sample_id), val(platform), path(reads)
 
 	output:
-	tuple val(sample_id), path(reads), path("${sample_id}_seqfu_report.tsv")
+	tuple val(sample_id), val(platform), path(reads), path("${sample_id}_seqfu_report.tsv")
 
 	script:
 	"""
@@ -24,4 +24,3 @@ process VALIDATE_SEQS {
 	`realpath ${reads}` > ${sample_id}_seqfu_report.tsv
 	"""
 }
-

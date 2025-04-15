@@ -2,7 +2,6 @@ process SOURMASH_DB_SKETCH {
 
 	/* */
 
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries
 
@@ -11,6 +10,9 @@ process SOURMASH_DB_SKETCH {
 
 	output:
 	path "*.sig.gz"
+
+	when:
+	params.tools.contains("sourmash") || params.all || params.sourmash
 
 	script:
 	def ref_prefix = file(fasta_db)
@@ -25,16 +27,52 @@ process SOURMASH_DB_SKETCH {
 }
 
 process SOURMASH_INDEX {
+
+	/*
+	Note!
+
+	This process will require Sourmash version >= 4.9.0. As of April 15th, 2025,
+	the maximum version on PyPI and Bioconda is 4.8.14.
+	*/
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries
+
+	input:
+	path fasta_db
+
+	output:
+	path "*.rocksdb"
+
+	when:
+	params.tools.contains("sourmash") || params.all || params.sourmash
+
 	script:
+	def ref_prefix = file(fasta_db).getBaseName()
 	"""
-	sourmash index <database_name>.rocksdb <inputfile1> [ <inputfile2> ... ] -F rocksdb
+	sourmash index \
+	--ksize 31 --dna --scaled 1000 \
+	${ref_prefix}.rocksdb fasta_db -F rocksdb
 	"""
 }
 
 process SOURMASH_TAX_PREPARE {
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries
+
+	input:
+	path tax_csv
+
+	output:
+	path "*"
+
+	when:
+	params.tools.contains("sourmash") || params.all || params.sourmash
+
 	script:
 	"""
-	sourmash tax prepare --taxonomy file1.csv file2.csv -o tax.db
+	sourmash tax prepare --taxonomy ${tax_csv} -o tax.db
 	"""
 }
 
@@ -52,6 +90,9 @@ process SOURMASH_SKETCH_SAMPLE {
 
 	output:
 	tuple val(sample_id), path("${sample_id}_reads.sig")
+
+	when:
+	params.tools.contains("sourmash") || params.all || params.sourmash
 
 	when:
 	params.download_only == false && params.sourmash == true
@@ -75,7 +116,10 @@ process SOURMASH_GATHER {
 	tuple val(sample_id), path(sample_sigs), path(ref_sigs)
 
 	output:
-	path "*"
+	tuple val(sample_id), path("${sample_id}_sourmash_results.csv")
+
+	when:
+	params.tools.contains("sourmash") || params.all || params.sourmash
 
 	script:
 	"""
@@ -86,15 +130,35 @@ process SOURMASH_GATHER {
 }
 
 process SOURMASH_TAX_METAGENOME {
+
+	/* */
+
+	tag "${sample_id}"
+
+	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+	maxRetries 1
+
+	input:
+	tuple val(sample_id), path(gather_csv), path(taxonomy)
+
+	output:
+	path "*"
+
+	when:
+	params.tools.contains("sourmash") || params.all || params.sourmash
+
 	script:
 	"""
 	sourmash tax metagenome
-    --gather-csv HSMA33MX_gather_x_gtdbrs202_k31.csv \
-    --taxonomy gtdb-rs202.taxonomy.v2.csv
+    --gather-csv ${gather_csv} \
+    --taxonomy ${taxonomy}
 	"""
 }
 
 process SOURMASH_TAX_SUMMARIZE {
+	input:
+	path db
+
 	script:
 	"""
 	sourmash tax summarize gtdb-rs202.taxonomy.v2.db -o ranks.csv

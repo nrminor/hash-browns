@@ -9,22 +9,25 @@ process GOTTCHA2_PROFILE_NANOPORE {
     cpus params.gottcha2_cpus
 
     input:
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path(fastq)
+    tuple val(sample_id), path(fastq), path(ref_db)
 
     output:
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path("${sample_id}*.sam"), emit: aligned
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path("${sample_id}*.full.tsv"), emit: full_tsv
+    tuple val(sample_id), path("${sample_id}*.sam"), path(ref_db), emit: aligned
+    tuple val(sample_id), path("${sample_id}*.full.tsv"), path(ref_db), emit: full_tsv
     path "*.tsv", emit: all_stats
 
+	when:
+	params.tools.contains("gottcha2") || params.tools.contains("gottcha") || params.all || params.gottcha2
+
     script:
-    def ref_prefix = file(ref_mmi).getBaseName().toString().replace(".mmi", "")
+    def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
     """
     gottcha2.py  \
     --database ${ref_prefix} \
     --prefix ${sample_id} \
-     -t ${task.cpus} \
-    -i ${fastq} \
-     --nanopore
+    --noCutoff ---dbLevel strain --threads ${task.cpus} \
+    --nanopore \
+    --input ${fastq}
     """
 }
 
@@ -39,17 +42,24 @@ process GOTTCHA2_PROFILE_ILLUMINA {
     cpus params.gottcha2_cpus
 
     input:
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path(fastq1), path(fastq2)
+    tuple val(sample_id), path(fastq), path(ref_db)
 
     output:
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path("${sample_id}*.sam"), emit: aligned
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path("${sample_id}*.full.tsv"), emit: full_tsv
+    tuple val(sample_id), path("${sample_id}*.sam"), path(ref_db), emit: aligned
+    tuple val(sample_id), path("${sample_id}*.full.tsv"), path(ref_db), emit: full_tsv
     path "*.tsv", emit: all_stats
 
+	when:
+	params.tools.contains("gottcha2") || params.tools.contains("gottcha") || params.all || params.gottcha2
+
     script:
-    def ref_prefix = file(ref_mmi).getBaseName().toString().replace(".mmi", "")
+    def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
     """
-    gottcha2.py -d ${ref_prefix} -t ${task.cpus} -i ${fastq1} ${fastq2}
+    gottcha2.py \
+    --database ${ref_prefix} \
+    --prefix ${sample_id} \
+    --noCutoff ---dbLevel strain --threads ${task.cpus} \
+    --input ${fastq}
     """
 }
 
@@ -63,19 +73,21 @@ process GENERATE_FASTA {
     cpus params.gottcha2_cpus
 
     input:
-    tuple path(ref_mmi), path(stats), path(tsv), val(sample_id), path("*extract*"), emit: extracted_reads
-    path "*.*", emit: all_files
+    tuple val(sample_id), path(sam), path(ref_db)
 
     output:
-    path "*.fasta"
+    path "*"
 
     script:
-    def ref_prefix = file(ref_mmi).getBaseName().toString().replace(".mmi", "")
+
+	when:
+	params.tools.contains("gottcha2") || params.tools.contains("gottcha") || params.all || params.gottcha2
+    def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
     """
     gottcha2.py \
-    -s ${sample_id}.gottcha_species.sam \
-    -ef \
-    --nanopore \
-    --database ${ref_prefix}
+    --noCutoff ---dbLevel strain --threads ${task.cpus} -ef \
+    --database ${ref_prefix} \
+    --prefix ${sample_id} \
+    --sam ${sam}
     """
 }
