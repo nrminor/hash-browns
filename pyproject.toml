@@ -1,0 +1,134 @@
+[project]
+name = "hash-browns"
+description = "Metagenomic read classification well done."
+authors = [
+  { name = "Nicholas Minor", email = "nrminor@wisc.edu" },
+]
+requires-python = ">= 3.10"
+version = "0.1.0"
+dependencies = [
+    "biopython>=1.85",
+    "loguru>=0.7.3",
+    "pandas>=2.2.3",
+    "polars>=1.26.0",
+    "pysam>=0.23.0",
+    "typer>=0.15.2",
+]
+
+[tool.pixi.project]
+channels = ["conda-forge", "bioconda", "anaconda"]
+platforms = ["osx-64", "linux-64", "linux-aarch64"]
+
+[tool.pixi.dependencies]
+# Core Bioinformatics ToolKits
+# ----------------------------------------------------------------------------------- #
+samtools = ">=1.5,<2"
+minimap2 = ">=2.22,<3"
+seqkit = ">=2.10.0,<3"
+bbmap = ">=39.19,<40"
+vsearch = ">=2.30.0,<3"
+seqfu = ">=1.22.3,<2"
+nanoq = ">=0.10.0,<0.11"
+csvtk = ">=0.33.0,<0.34"
+fastqc-rs = ">=0.3.4,<0.4"
+multiqc = ">=1.28,<2"
+nextflow = ">=24.10.5,<25"
+zstd = ">=1.5.7,<2"
+unzip = ">=6.0,<7"
+# taxonomic classification output standardizer: https://github.com/taxprofiler/taxpasta
+taxpasta = ">=0.7.0,<0.8" 
+# interactive pie charts often used to browse classifications https://github.com/marbl/Krona/wiki
+krona = ">=2.8.1,<3" 
+
+# Metagenomic ToolKits
+# ----------------------------------------------------------------------------------- #
+# Feature-rich k-mer hashing, querying, and profiling toolkit built around FracMinHash
+# sketches: https://github.com/sourmash-bio/sourmash
+sourmash = ">=4.8.14,<5"
+
+# minimap2 wrapper with carefully curated database: https://github.com/poeli/GOTTCHA2
+gottcha2 = ">=2.1.8.11,<3" 
+
+# K-mer-based, coverage-sensitive metagenomic profiler for massive reference datasets,
+# written by Wei Shen: https://github.com/shenwei356/kmcp
+kmcp = ">=0.9.4,<0.10"
+
+# K-mer-based metagenomic profiler and containment ANI calculator with special support
+# for low-coverage genomes and Nanopore reads. Also probably the fastest on this list:
+# https://sylph-docs.github.io/
+sylph = ">=0.8.1,<0.9"
+sylph-tax = ">=1.2.0,<2"
+
+# Protein reference-based classifier (possibly best for short reads?):
+# https://github.com/bioinformatics-centre/kaiju
+kaiju = ">=1.10.1,<2"
+
+# BLAST suit alternative created by Wei Shen for querying enormous databases
+lexicmap = ">=0.7.0,<0.8"
+
+# Innovative strobemer-based minimap2 alternative with better sensitivity and specificity
+strobealign = ">=0.16.0,<0.17" 
+
+# Among the highest-quality and best thought-out clustering and querying toolkits
+# currently on the market: https://github.com/soedinglab/mmseqs2
+mmseqs2 = ">=17.b804f,<18" # clustering and querying toolkit
+
+# Others to consider that I couldn't include while solving the environment:
+#  - Centrifuge: https://github.com/DaehwanKimLab/centrifuge?tab=readme-ov-file
+#  - mOTUs: https://github.com/DaehwanKimLab/centrifuge?tab=readme-ov-file
+#  - MetaPHlAn: https://github.com/biobakery/MetaPhlAn
+#  - CLARK: http://clark.cs.ucr.edu/
+#
+# Also, dishonorable mention for MALT, which installs successfully, but only supports JVM
+# versions up to 20:
+#  Ultrafast metagenomic alignment replacement for the BLAST suite that is compatible
+#  with MEGAN: https://software-ab.cs.uni-tuebingen.de/download/malt/welcome.html
+# malt = ">=0.62,<0.63"
+# ----------------------------------------------------------------------------------- #
+
+[tool.pixi.target.linux-64.dependencies]
+apptainer = ">=1.3.6,<2"
+# https://github.com/pirovc/ganon
+ganon = ">=2.1.1,<3"
+
+[tool.pixi.target.linux-aarch64.dependencies]
+apptainer = ">=1.3.6,<2"
+ganon = ">=2.1.1,<3"
+
+[tool.pixi.pypi-dependencies]
+hash-browns = { path = ".", editable = true }
+
+[dependency-groups]
+dev = [
+  "basedpyright>=1.28.4",
+  "jupyter>=1.1.1",
+  "marimo[sql]>=0.11.28",
+  "polars>=1.26.0",
+  "pyarrow>=19.0.1",
+  "pytest>=8.3.5",
+  "ruff>=0.11.2",
+  "tox>=4.24.2",
+]
+
+[build-system]
+requires = ["setuptools >= 40.8.0", "cffi >=1.15.0,!=1.17.0"]
+build-backend = "setuptools.build_meta:__legacy__"
+
+[tool.setuptools]
+py-modules = ["bin"]
+
+[project.scripts]
+"hash-browns" = "bin.__main__:main"
+
+[tool.uv]
+compile-bytecode = true
+
+[tool.ruff.lint]
+select = []
+# ignore = ["ALL"]
+# extend-ignore = ["ALL"]
+
+[tool.basedpyright]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "basic"
