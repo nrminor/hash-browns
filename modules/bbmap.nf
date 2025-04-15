@@ -28,8 +28,6 @@ process MERGE_PAIRS {
 }
 process FETCH_ACCESSION2TAXID {
 
-	storeDir params.taxpath
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
@@ -55,8 +53,6 @@ process FETCH_ACCESSION2TAXID {
 
 process CONSTRUCT_TAX_TREE {
 
-	storeDir params.taxpath
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
@@ -75,8 +71,6 @@ process CONSTRUCT_TAX_TREE {
 }
 
 process CONSTRUCT_GITABLE {
-
-	storeDir params.taxpath
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
@@ -97,8 +91,6 @@ process CONSTRUCT_GITABLE {
 
 process ANALYZE_ACCESSIONS {
 
-	storeDir params.taxpath
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
@@ -117,8 +109,6 @@ process ANALYZE_ACCESSIONS {
 process FETCH_NT {
 
 	/* */
-
-	storeDir params.nt_storedir
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1

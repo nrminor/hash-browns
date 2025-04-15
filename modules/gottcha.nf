@@ -4,7 +4,10 @@ process GOTTCHA2_PROFILE_NANOPORE {
     // publishDir params.gottcha_sam, mode: 'copy', overwrite: false, pattern: "*.sam"
     // publishDir params.gottcha_stats, mode: 'copy', overwrite: false, pattern: "*.tsv"
 
+    maxForks { params.max_tasks ? params.max_tasks : params.available_cpus }
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
+
+    cpus 12
 
     input:
     tuple val(sample_id), path(fastq), path(ref_db)
@@ -18,7 +21,7 @@ process GOTTCHA2_PROFILE_NANOPORE {
     (params.tools && params.tools.contains("gottcha2") || params.tools.contains("gottcha")) || params.all || params.gottcha2
 
     script:
-    def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
+    def ref_prefix = file(ref_db[0]).getBaseName().toString().replace(".mmi", "")
     """
     gottcha2.py  \
     --database ${ref_prefix} \
@@ -35,7 +38,10 @@ process GOTTCHA2_PROFILE_ILLUMINA {
     // publishDir params.gottcha_sam, mode: 'copy', overwrite: false, pattern: "*.sam"
     // publishDir params.gottcha_stats, mode: 'copy', overwrite: false, pattern: "*.tsv"
 
+    maxForks { params.max_tasks ? params.max_tasks : params.available_cpus }
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
+
+    cpus 12
 
     input:
     tuple val(sample_id), path(fastq), path(ref_db)
@@ -49,7 +55,7 @@ process GOTTCHA2_PROFILE_ILLUMINA {
     (params.tools && params.tools.contains("gottcha2") || params.tools.contains("gottcha")) || params.all || params.gottcha2
 
     script:
-    def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
+    def ref_prefix = file(ref_db[0]).getBaseName().toString().replace(".mmi", "")
     """
     gottcha2.py \
     --database ${ref_prefix} \
@@ -76,7 +82,7 @@ process GENERATE_FASTA {
     (params.tools && params.tools.contains("gottcha2") || params.tools.contains("gottcha")) || params.all || params.gottcha
 
     script:
-    def ref_prefix = file(ref_db).getBaseName().toString().replace(".mmi", "")
+    def ref_prefix = file(ref_db[0]).getBaseName().toString().replace(".mmi", "")
     """
     gottcha2.py \
     --noCutoff ---dbLevel strain --threads ${task.cpus} -ef \

@@ -2,6 +2,8 @@ process SOURMASH_DB_SKETCH {
 
 	/* */
 
+	storeDir params.db_cache
+
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries
 

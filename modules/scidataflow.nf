@@ -3,7 +3,7 @@ process FETCH_MANIFEST_DATABASES {
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
-	storeDir ""
+	storeDir params.db_cache
 
 	input:
 	path data_manifest

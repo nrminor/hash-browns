@@ -1,7 +1,5 @@
 process FETCH_TAXONOMY {
 
-	storeDir params.taxpath
-
 	output:
 	path "taxdmp.zip"
 
@@ -12,8 +10,6 @@ process FETCH_TAXONOMY {
 }
 
 process UNZIP_TAXONOMY {
-
-	storeDir params.taxpath
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
