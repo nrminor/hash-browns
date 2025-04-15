@@ -59,11 +59,11 @@ workflow {
 
 			Run settings:
 			-----------------------------------
-			[realtime_dir   : ${params.realtime_dir ?: ""}]
-			[cleanup mode   : ${params.cleanup ? "on" : "off" }]
-			[download only? : ${params.download_only ?: ""}]
-			[available cpus : ${params.available_cpus}]
-			[run date       : ${params.date}]
+			realtime_dir   : ${params.realtime_dir ?: ""}
+			cleanup mode   : ${params.cleanup ? "on" : "off" }
+			download only? : ${params.download_only ?: ""}
+			available cpus : ${params.available_cpus}
+			run date       : ${params.date}
 
 			""".stripIndent()
 	)

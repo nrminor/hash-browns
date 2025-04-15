@@ -5,66 +5,78 @@ files:
   md5: bd7b29e8beb1518a38075b28b678c395
   size: 43645659
   url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-viral-k51.zip
-- path: genbank-2022.03-viral.lineages.csv.gz
-  tracked: false
-  locked: false
-  md5: 8456fe10e2f5ad56b8beabe4dae295ac
-  size: 623053
-  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-viral.lineages.csv.gz
-- path: gottcha_db.species.fna.mmi
-  tracked: false
-  locked: false
-  md5: 9fcb35a5fbcb7c2f7ed5f23f11dae413
-  size: 98824210834
-  url: https://ref-db.edgebioinformatics.org/gottcha2/RefSeq-r218/gottcha_db.species.fna.mmi
-- path: imgvr_c200_v0.3.0.syldb
-  tracked: false
-  locked: false
-  md5: 118e8364b4c6d37bd12d8cc98f30afbc
-  size: 2134450877
-  url: http://faust.compbio.cs.cmu.edu/sylph-stuff/imgvr_c200_v0.3.0.syldb
-- path: genbank-2022.03-viral-k21.zip
-  tracked: false
-  locked: false
-  md5: d89292147aec0ef0d9c64ab79ea93217
-  size: 43527572
-  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-viral-k21.zip
-- path: gottcha_db.species.fna.gz
-  tracked: false
-  locked: false
-  md5: b70de7f6cae20f88d211ec19c4516645
-  size: 13428712270
-  url: https://ref-db.edgebioinformatics.org/gottcha2/RefSeq-r218/gottcha_db.species.fna.gz
-- path: genbank-2022.03-bacteria-k31.zip
-  tracked: false
-  locked: false
-  md5: de3f414043d3c95f346fb97e40010b02
-  size: 39386146514
-  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-bacteria-k31.zip
 - path: genbank-2022.03-viral-k31.zip
   tracked: false
   locked: false
   md5: 878a24f1fd4b3a06b01ef4b2e9957ef6
   size: 43599719
   url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-viral-k31.zip
+- path: gottcha_db.species.fna.mmi
+  tracked: false
+  locked: false
+  md5: 9fcb35a5fbcb7c2f7ed5f23f11dae413
+  size: 98824210834
+  url: https://ref-db.edgebioinformatics.org/gottcha2/RefSeq-r218/gottcha_db.species.fna.mmi
+- path: gottcha_db.species.fna.stats
+  tracked: false
+  locked: false
+  md5: bdab75f0a886283c4191158ec5502cee
+  size: 4213018
+  url: https://ref-db.edgebioinformatics.org/gottcha2/RefSeq-r218/gottcha_db.species.fna.stats
+- path: genbank-2022.03-viral-k21.zip
+  tracked: false
+  locked: false
+  md5: d89292147aec0ef0d9c64ab79ea93217
+  size: 43527572
+  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-viral-k21.zip
 - path: genbank-2022.03-bacteria-k21.zip
   tracked: false
   locked: false
   md5: 9431e7130c61b282c869c2d3fc047edf
   size: 39634696055
   url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-bacteria-k21.zip
-- path: genbank-2022.03-bacteria.lineages.csv.gz
+- path: genbank-2022.03-bacteria-k31.zip
   tracked: false
   locked: false
-  md5: adbe2c12f8b03f21f021cb0ad3713aa7
-  size: 5636386
-  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-bacteria.lineages.csv.gz
+  md5: de3f414043d3c95f346fb97e40010b02
+  size: 39386146514
+  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-bacteria-k31.zip
+- path: imgvr_c200_v0.3.0.syldb
+  tracked: false
+  locked: false
+  md5: 118e8364b4c6d37bd12d8cc98f30afbc
+  size: 2134450877
+  url: http://faust.compbio.cs.cmu.edu/sylph-stuff/imgvr_c200_v0.3.0.syldb
 - path: fungi-refseq-2024-07-25-c200-v0.3.syldb
   tracked: false
   locked: false
   md5: b6ae7879fab9a723fac522954d6aed05
   size: 710490375
   url: http://faust.compbio.cs.cmu.edu/sylph-stuff/fungi-refseq-2024-07-25-c200-v0.3.syldb
+- path: gottcha_db.species.fna.tax.tsv
+  tracked: false
+  locked: false
+  md5: 8453048587e03e3cf2411f057bac03f1
+  size: 4650194
+  url: https://ref-db.edgebioinformatics.org/gottcha2/RefSeq-r218/gottcha_db.species.fna.tax.tsv
+- path: gottcha_db.species.fna.gz
+  tracked: false
+  locked: false
+  md5: b70de7f6cae20f88d211ec19c4516645
+  size: 13428712270
+  url: https://ref-db.edgebioinformatics.org/gottcha2/RefSeq-r218/gottcha_db.species.fna.gz
+- path: genbank-2022.03-viral.lineages.csv.gz
+  tracked: false
+  locked: false
+  md5: 8456fe10e2f5ad56b8beabe4dae295ac
+  size: 623053
+  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-viral.lineages.csv.gz
+- path: genbank-2022.03-bacteria.lineages.csv.gz
+  tracked: false
+  locked: false
+  md5: adbe2c12f8b03f21f021cb0ad3713aa7
+  size: 5636386
+  url: https://farm.cse.ucdavis.edu/~ctbrown/sourmash-db/genbank-2022.03/genbank-2022.03-bacteria.lineages.csv.gz
 remotes: {}
 metadata:
   title: hash-browns
