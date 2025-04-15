@@ -124,7 +124,6 @@ process FETCH_NT {
 	maxRetries 1
 
 	output:
-	path "nt.fa.gz"
 
 	when:
 	params.fast_mode == false
@@ -142,8 +141,6 @@ process FETCH_NT {
 process GI2TAXID {
 
 	/* */
-
-	storeDir params.nt_storedir
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
@@ -166,8 +163,6 @@ process GI2TAXID {
 // process SORT_BY_NAME {
 
 // 	/* */
-
-// 	storeDir params.nt_storedir
 
 // 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 // 	maxRetries 1
@@ -215,8 +210,6 @@ process SKETCH_FAST_DB_WITH_BBSKETCH {
 
 	/* */
 
-	storeDir params.nt_storedir
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
@@ -246,8 +239,6 @@ process SKETCH_FAST_DB_WITH_BBSKETCH {
 process SKETCH_DB_WITH_BBSKETCH {
 
 	/* */
-
-	storeDir params.nt_storedir
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1

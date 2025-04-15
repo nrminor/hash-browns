@@ -6,8 +6,6 @@ process GOTTCHA2_PROFILE_NANOPORE {
 
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
 
-    cpus params.gottcha2_cpus
-
     input:
     tuple val(sample_id), path(fastq), path(ref_db)
 
@@ -39,8 +37,6 @@ process GOTTCHA2_PROFILE_ILLUMINA {
 
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
 
-    cpus params.gottcha2_cpus
-
     input:
     tuple val(sample_id), path(fastq), path(ref_db)
 
@@ -69,8 +65,6 @@ process GENERATE_FASTA {
     // publishDir params.gottcha_fasta, mode: 'copy', overwrite: false, pattern: "*.fasta"
 
     errorStrategy { task.attempt < 3 ? 'retry' : 'ignore' }
-
-    cpus params.gottcha2_cpus
 
     input:
     tuple val(sample_id), path(sam), path(ref_db)

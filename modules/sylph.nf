@@ -2,8 +2,6 @@ process SYLPH_SKETCH_DB {
 
 	/* */
 
-	storeDir params.nt_storedir
-
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
 
