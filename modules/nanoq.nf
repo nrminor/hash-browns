@@ -5,7 +5,7 @@ process READ_QC {
 
 	tag "${sample_id}"
 	label "general"
-	publishDir params.filtered, mode: 'copy', overwrite: true
+	// publishDir params.filtered, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 3 ? 'retry' : params.errorMode }
 	maxRetries 2

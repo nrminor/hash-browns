@@ -5,7 +5,7 @@ process FASTQC_REPORT {
 
 	tag "${sample_id}"
 	label "general"
-	publishDir params.fastqc_results, mode: 'copy', overwrite: true
+	// publishDir params.fastqc_results, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 3 ? 'retry' : params.errorMode }
 	maxRetries 2
@@ -33,7 +33,7 @@ process MULTIQC_REPORT {
     */
 
 	label "multiqc"
-	publishDir params.preprocessing, mode: 'copy', overwrite: true
+	// publishDir params.preprocessing, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 3 ? 'retry' : params.errorMode }
 	maxRetries 2

@@ -5,7 +5,7 @@ process VALIDATE_SEQS {
 
 	tag "${sample_id}"
 	label "general"
-	publishDir params.read_checks, pattern: "*.tsv", mode: 'copy', overwrite: true
+	// publishDir params.read_checks, pattern: "*.tsv", mode: 'copy', overwrite: true
 
 	errorStrategy 'ignore'
 

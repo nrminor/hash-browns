@@ -195,7 +195,7 @@ process GI2TAXID {
 // 	/* */
 
 // 	tag "${tag}"
-// 	publishDir params.results, mode: 'copy'
+// // 	publishDir params.results, mode: 'copy'
 
 // 	input:
 // 	path nt_sorted
@@ -280,7 +280,7 @@ process CLASSIFY_WITH_BBSKETCH {
 	/* */
 
 	tag "${sample_id}"
-	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
+// 	publishDir params.bbsketch_classifications, mode: 'copy', overwrite: true
 
 	errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
 	maxRetries 1
