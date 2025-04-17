@@ -19,11 +19,11 @@ workflow CLASSIFICATION {
         ch_custom_fa_db,
     )
 
-    SOURMASH_WORKFLOW(
-        ch_query_fastqs.map { id, _platform, fastq -> tuple(id, file(fastq)) },
-        ch_custom_fa_db,
-        ch_sourmash_dbs,
-    )
+    // SOURMASH_WORKFLOW(
+    //     ch_query_fastqs.map { id, _platform, fastq -> tuple(id, file(fastq)) },
+    //     ch_custom_fa_db,
+    //     ch_sourmash_dbs,
+    // )
 
     GOTTCHA2_WORKFLOW(
         ch_gottcha2_db,

@@ -1,7 +1,7 @@
 [project]
 title = "hash-browns"
 description = "Benchmarking metagenomic profilers to a crisp"
-last_modified = "2025-04-16T22:16:06.581553Z"
+last_modified = "2025-04-17T15:37:12.499017Z"
 global = false
 
 [[project.datasets]]

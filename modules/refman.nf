@@ -10,7 +10,7 @@ process FETCH_SYLPH_DATABASES {
     tuple val("sylph"), path("sylph.tar")
 
     when:
-    params.download || params.download_only
+    (params.download || params.download_only) && params.sylph
 
     script:
     """
@@ -30,7 +30,7 @@ process FETCH_SOURMASH_DATABASES {
     tuple val("sourmash"), path("sourmash-bacterial-viral.tar")
 
     when:
-    params.download || params.download_only
+    (params.download || params.download_only) && params.sourmash
 
     script:
     """
@@ -50,7 +50,7 @@ process FETCH_GOTTCHA2_DATABASES {
     tuple val("gottcha2"), path("gottcha-db.tar")
 
     when:
-    params.download || params.download_only
+    (params.download || params.download_only) && params.gottcha2
 
     script:
     """

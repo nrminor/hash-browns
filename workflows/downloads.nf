@@ -19,8 +19,10 @@ workflow DOWNLOADS {
     FETCH_GOTTCHA2_DATABASES(ch_refman_registry)
 
     EXTRACT_DB_FILES(
-        FETCH_SYLPH_DATABASES.mix(FETCH_SOURMASH_DATABASES).mix(FETCH_GOTTCHA2_DATABASES)
+        FETCH_SYLPH_DATABASES.out.mix(FETCH_SOURMASH_DATABASES.out).mix(FETCH_GOTTCHA2_DATABASES.out)
     )
+
+    EXTRACT_DB_FILES.out.view()
 
     ch_sylph_dbs = params.download && !params.download_only
         ? EXTRACT_DB_FILES.out.filter { tool, _files -> tool == "sylph" }

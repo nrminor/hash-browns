@@ -19,11 +19,11 @@ workflow GOTTCHA2_WORKFLOW {
         .map { sample_id, _platform, fastq -> tuple(sample_id, file(fastq)) }
 
     GOTTCHA2_PROFILE_NANOPORE(
-        ch_nanopore_fastqs.combine(ch_gottcha2_db)
+        ch_nanopore_fastqs.combine(ch_gottcha2_db.collect())
     )
 
     GOTTCHA2_PROFILE_ILLUMINA(
-        ch_illumina_fastqs.combine(ch_gottcha2_db)
+        ch_illumina_fastqs.combine(ch_gottcha2_db.collect())
     )
 
     GENERATE_FASTA(
