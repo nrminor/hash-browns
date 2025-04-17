@@ -7,109 +7,50 @@ WORKDIR /scratch
 # Set the maintainer label
 LABEL maintainer="nrminor@wisc.edu"
 
-# Set time zone
-ENV TZ America/New_York
-
-# set home
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/New_York
 ENV HOME=/opt
 ENV ~=/opt
 
-# Set environment variables to non-interactive (this prevents some prompts)
-ENV DEBIAN_FRONTEND=non-interactive
+# Set default command to be the bash shell
+ENTRYPOINT ["bash"]
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    autoconf \
-    automake \
-    gcc \
-    make \
-    cmake \
-    libtool \
-    pkg-config \ 
-    zstd \
-    pigz \
-    unzip \
-    wget \
-    curl \
-    git \
-    default-jre \
-    python3.12 \
-    python3-pip \
-    nim && \
-    apt-get clean && \
+# run a few apt installs
+RUN apt-get update && \
+    apt-get install -y curl wget && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir /dependencies && \
     dpkg -l > /dependencies/apt-get.lock
 
-# Install VSEARCH
-RUN wget https://github.com/torognes/vsearch/archive/v2.25.0.tar.gz && \
-    tar xzf v2.25.0.tar.gz && \
-    cd vsearch-2.25.0 && \
-    ./autogen.sh && \
-    ./configure CFLAGS="-O3" CXXFLAGS="-O3" && \
-    make -j 8 && \
-    make install
+# Install everything else with Pixi:
+# --------------------------------
+# 1) copy the required dependency and configuration file into the image
+COPY pyproject.toml $HOME/pyproject.toml
+COPY pixi.lock $HOME/pixi.lock
 
-# Install SeqKit
-RUN wget https://github.com/shenwei356/seqkit/releases/download/v2.1.0/seqkit_linux_amd64.tar.gz && \
-    tar -xvzf seqkit_linux_amd64.tar.gz && \
-    chmod +x seqkit && \
-    mv seqkit /usr/local/bin/ && \
-    rm seqkit_linux_amd64.tar.gz
+# 2) install pixi
+RUN cd $HOME && PIXI_ARCH=x86_64 curl -fsSL https://pixi.sh/install.sh | bash
 
-# Install SeqFu
-RUN git clone https://github.com/telatin/seqfu2 && \
-    cd seqfu2 && \
-    nimble build && \
-    cd .. && \
-    mv seqfu2 /opt
-ENV PATH="${PATH}:/opt/seqfu2/bin"
+# 3) make sure pixi and pixi installs are on the $PATH
+ENV PATH=$PATH:$HOME/.pixi/bin
 
-# Install BBMap
-RUN wget https://sourceforge.net/projects/bbmap/files/BBMap_38.90.tar.gz && \
-    tar -xvzf BBMap_38.90.tar.gz && \
-    rm BBMap_38.90.tar.gz && \
-    mv bbmap /opt
+# 4) install everything else (save for a crates.io rust dependency) with pixi
+RUN cd $HOME && pixi install --frozen && pixi clean cache --assume-yes
 
-# Set BBMap environment variable
-ENV PATH="/opt/bbmap:${PATH}"
+# 5) install the rust dependency with cargo, which will be slow because it involves compilation
+RUN cd $HOME && pixi run install-scidataflow
 
-# Install csvtk
-RUN wget https://github.com/shenwei356/csvtk/releases/download/v0.23.0/csvtk_linux_amd64.tar.gz && \
-    tar -xvzf csvtk_linux_amd64.tar.gz && \
-    chmod +x csvtk && \
-    mv csvtk /usr/local/bin/ && \
-    rm csvtk_linux_amd64.tar.gz
+# 6) Make sure the cargo-installed binaries are on $PATH
+ENV PATH=$PATH:$HOME/.cargo/bin
 
-# install Rust
-RUN mkdir -m777 /opt/rust /opt/.cargo
-ENV RUSTUP_HOME=/opt/rust CARGO_HOME=/opt/.cargo PATH=/opt/.cargo/bin:$PATH
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y && \
-    bash "/opt/.cargo/env"
+# 7) Set up the global scidataflow configuration
+RUN sdf config --name "Docker Bot" --email "nrminor@wisc.edu" --affiliation "University of Wisconsin - Madison"
 
-# Install Sylph
-RUN git clone https://github.com/bluenote-1577/sylph && \
-    cd sylph && \
-    cargo install --path . --root /opt/.cargo
+# 7) modify the shell config so that each container launches within the pixi env
+RUN echo "export PATH=$PATH:$HOME/.pixi/envs/default/bin" >> $HOME/.bashrc
 
-# Install fastqc-rs
-RUN cargo install fastqc-rs --root /opt/.cargo
+# 8) modify some nextflow environment variables
+RUN echo "export NXF_CACHE_DIR=/scratch" >> $HOME/.bashrc
+RUN echo "export NXF_HOME=/scratch" >> $HOME/.bashrc
 
-# Install scidataflow
-RUN cargo install scidataflow --root /opt/.cargo
-
-# Install Sourmash
-RUN pip install sourmash==4.8.4
-
-# Install multiqc
-RUN pip install multiqc==1.19
-
-# Install Nextflow
-RUN curl -s https://get.nextflow.io | bash && \
-    chmod 777 nextflow && \
-    mv nextflow /usr/local/bin/ && \
-    chmod 777 /usr/local/bin/nextflow
-
-# Set default command
-CMD ["bash"]

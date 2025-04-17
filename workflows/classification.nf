@@ -8,27 +8,21 @@ workflow CLASSIFICATION {
     take:
     ch_query_fastqs
     ch_custom_fa_db
-    ch_sylph_db
-    ch_sourmash_k51
-    ch_sourmash_k31
-    ch_sourmash_k21
-    ch_sourmash_taxonomy
+    ch_sylph_dbs
+    ch_sourmash_dbs
     ch_gottcha2_db
 
     main:
     SYLPH_WORKFLOW(
         ch_query_fastqs.map { id, _platform, fastq -> tuple(id, file(fastq)) },
-        ch_sylph_db,
+        ch_sylph_dbs.flatten(),
         ch_custom_fa_db,
     )
 
     SOURMASH_WORKFLOW(
         ch_query_fastqs.map { id, _platform, fastq -> tuple(id, file(fastq)) },
         ch_custom_fa_db,
-        ch_sourmash_k51,
-        ch_sourmash_k31,
-        ch_sourmash_k21,
-        ch_sourmash_taxonomy,
+        ch_sourmash_dbs,
     )
 
     GOTTCHA2_WORKFLOW(

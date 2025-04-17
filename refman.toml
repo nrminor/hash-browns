@@ -1,0 +1,17 @@
+[project]
+title = "hash-browns"
+description = "Benchmarking metagenomic profilers to a crisp"
+last_modified = "2025-04-16T22:16:06.581553Z"
+global = false
+
+[[project.datasets]]
+label = "sylph"
+tar = "https://dholk.primate.wisc.edu/_webdav/dho/public/DHO%20Lab%20Bespoke%20Reference%20Dataset%20Registry/Metagenomics/%40files/syldb.tar"
+
+[[project.datasets]]
+label = "sourmash"
+tar = "https://dholk.primate.wisc.edu/_webdav/dho/public/DHO%20Lab%20Bespoke%20Reference%20Dataset%20Registry/Metagenomics/%40files/sourmash-bacterial-viral.tar"
+
+[[project.datasets]]
+label = "gottcha2"
+tar = "https://dholk.primate.wisc.edu/_webdav/dho/public/DHO%20Lab%20Bespoke%20Reference%20Dataset%20Registry/Metagenomics/%40files/gottcha-db.tar"

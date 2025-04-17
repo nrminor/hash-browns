@@ -41,7 +41,7 @@ workflow {
 
 			Storage directories:
 			-----------------------------------
-			
+			Database cache  : ${params.db_cache}
 
 			Chosen tools:
 			-----------------------------------
@@ -60,7 +60,7 @@ workflow {
 			Run settings:
 			-----------------------------------
 			realtime_dir   : ${params.realtime_dir ?: ""}
-			cleanup mode   : ${params.cleanup ? "on" : "off" }
+			cleanup mode   : ${params.cleanup ? "on" : "off"}
 			download only? : ${params.download_only ?: ""}
 			available cpus : ${params.available_cpus}
 			run date       : ${params.date}
@@ -68,7 +68,7 @@ workflow {
 			""".stripIndent()
 	)
 
-	// input channels
+	// fastq channels
 	if (params.realtime_dir) {
 		ch_single_fastqs = Channel.watchPath("${params.realtime_dir}/**/*.fastq*", 'create,modify')
 			.map { fastq -> tuple(file(fastq), file(fastq).countFastq()) }
@@ -82,7 +82,7 @@ workflow {
 			.map { fastq -> tuple(file(fastq), file(fastq).countFastq()) }
 			.filter { it[0].name.contains('_R1') == false && it[0].name.contains('_R2') == false }
 			.filter { it[1] >= 20 }
-			.map { fastq, _count -> tuple(file(fastq).getSimpleName(), file(fastq)) }
+			.map { fastq, _count -> tuple(file(fastq).getSimpleName(), "nanopore", file(fastq)) }
 		ch_paired_fastqs = Channel.fromFilePairs("${params.fastq_dir}/*_{1,2}.fastq.gz", flat: true)
 	}
 
@@ -98,18 +98,22 @@ workflow {
 		? Channel.fromPath(params.data_manifest)
 		: Channel.empty()
 
-	DOWNLOADS(ch_data_manifest)
+	ch_refman_registry = params.download || params.download_only
+		? Channel.fromPath(params.refman_registry)
+		: Channel.empty()
+
+	DOWNLOADS(
+		ch_data_manifest,
+		ch_refman_registry,
+	)
 
 	QUALITY_CONTROL(ch_fastqs)
 
 	CLASSIFICATION(
 		QUALITY_CONTROL.out,
 		ch_custom_fa_db,
-		DOWNLOADS.out.sylph_db,
-		DOWNLOADS.out.sourmash_k51,
-		DOWNLOADS.out.sourmash_k31,
-		DOWNLOADS.out.sourmash_k21,
-		DOWNLOADS.out.sourmash_taxonomy,
+		DOWNLOADS.out.sylph_dbs,
+		DOWNLOADS.out.sourmash_dbs,
 		DOWNLOADS.out.gottcha2_db,
 	)
 }

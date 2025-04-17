@@ -1,18 +1,16 @@
 [project]
 name = "hash-browns"
 description = "Metagenomic read classification well done."
-authors = [
-  { name = "Nicholas Minor", email = "nrminor@wisc.edu" },
-]
+authors = [{ name = "Nicholas Minor", email = "nrminor@wisc.edu" }]
 requires-python = ">= 3.10"
 version = "0.1.0"
 dependencies = [
-    "biopython>=1.85",
-    "loguru>=0.7.3",
-    "pandas>=2.2.3",
-    "polars>=1.26.0",
-    "pysam>=0.23.0",
-    "typer>=0.15.2",
+  "biopython>=1.85",
+  "loguru>=0.7.3",
+  "pandas>=2.2.3",
+  "polars>=1.26.0",
+  "pysam>=0.23.0",
+  "typer>=0.15.2",
 ]
 
 [tool.pixi.project]
@@ -36,9 +34,16 @@ nextflow = ">=24.10.5,<25"
 zstd = ">=1.5.7,<2"
 unzip = ">=6.0,<7"
 # taxonomic classification output standardizer: https://github.com/taxprofiler/taxpasta
-taxpasta = ">=0.7.0,<0.8" 
+taxpasta = ">=0.7.0,<0.8"
 # interactive pie charts often used to browse classifications https://github.com/marbl/Krona/wiki
-krona = ">=2.8.1,<3" 
+krona = ">=2.8.1,<3"
+
+# System Dependencies
+# ----------------------------------------------------------------------------------- #
+rust = ">=1.86.0,<1.87"
+openssl = ">=3.5.0,<4"
+pkg-config = ">=0.29.2,<0.30"
+compilers = ">=1.9.0,<2"
 
 # Metagenomic ToolKits
 # ----------------------------------------------------------------------------------- #
@@ -47,7 +52,7 @@ krona = ">=2.8.1,<3"
 sourmash = ">=4.8.14,<5"
 
 # minimap2 wrapper with carefully curated database: https://github.com/poeli/GOTTCHA2
-gottcha2 = ">=2.1.8.11,<3" 
+gottcha2 = ">=2.1.8.11,<3"
 
 # K-mer-based, coverage-sensitive metagenomic profiler for massive reference datasets,
 # written by Wei Shen: https://github.com/shenwei356/kmcp
@@ -67,7 +72,7 @@ kaiju = ">=1.10.1,<2"
 lexicmap = ">=0.7.0,<0.8"
 
 # Innovative strobemer-based minimap2 alternative with better sensitivity and specificity
-strobealign = ">=0.16.0,<0.17" 
+strobealign = ">=0.16.0,<0.17"
 
 # Among the highest-quality and best thought-out clustering and querying toolkits
 # currently on the market: https://github.com/soedinglab/mmseqs2
@@ -97,6 +102,10 @@ ganon = ">=2.1.1,<3"
 
 [tool.pixi.pypi-dependencies]
 hash-browns = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+install-scidataflow = "cargo install scidataflow"
+install-refman = "cargo install refman"
 
 [dependency-groups]
 dev = [
