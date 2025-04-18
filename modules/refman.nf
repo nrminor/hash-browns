@@ -3,11 +3,13 @@ process FETCH_SYLPH_DATABASES {
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
 
+    storeDir params.db_cache
+
     input:
     path refman_registry
 
     output:
-    tuple val("sylph"), path("sylph.tar")
+    tuple val("sylph"), path("syldb.tar")
 
     when:
     (params.download || params.download_only) && params.sylph
@@ -22,6 +24,8 @@ process FETCH_SOURMASH_DATABASES {
 
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
+
+    storeDir params.db_cache
 
     input:
     path refman_registry
@@ -42,6 +46,8 @@ process FETCH_GOTTCHA2_DATABASES {
 
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
+
+    storeDir params.db_cache
 
     input:
     path refman_registry
@@ -73,6 +79,6 @@ process EXTRACT_DB_FILES {
 
     script:
     """
-    tar xzf ${tar_archive}
+    tar xf ${tar_archive}
     """
 }
