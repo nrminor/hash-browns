@@ -17,15 +17,11 @@ workflow SYLPH_WORKFLOW {
 
     SYLPH_SKETCH_SAMPLE(ch_sample_fastqs)
 
-    ch_all_databases = ch_custom_fa.mix(ch_sylph_db)
+    ch_all_databases = SYLPH_SKETCH_DB.out.mix(ch_sylph_db)
 
     CLASSIFY_WITH_SYLPH(
         SYLPH_SKETCH_SAMPLE.out.combine(ch_all_databases)
     )
 
     SYLPH_TAX_DOWNLOAD()
-
-    SYLPH_TAXPROF(
-        CLASSIFY_WITH_SYLPH.out.combine(SYLPH_TAX_DOWNLOAD.out)
-    )
 }

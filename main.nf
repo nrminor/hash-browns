@@ -72,15 +72,15 @@ workflow {
 	if (params.realtime_dir) {
 		ch_single_fastqs = Channel.watchPath("${params.realtime_dir}/**/*.fastq*", 'create,modify')
 			.map { fastq -> tuple(file(fastq), file(fastq).countFastq()) }
-			.filter { it[0].name.contains('_R1') == false && it[0].name.contains('_R2') == false }
+			.filter { it[0].getBaseName().contains('_R1') == false && it[0].getBaseName().contains('_R2') == false }
 			.filter { it[1] >= 20 }
-			.map { fastq, _count -> tuple(file(fastq).getSimpleName(), "nanopore", file(fastq)) }
+			.map { fastq, _count -> tuple(file(fastq).getSimplegetBaseName(), "nanopore", file(fastq)) }
 		ch_paired_fastqs = Channel.fromFilePairs("${params.realtime_dir}/*_{1,2}.fastq.gz", flat: true)
 	}
 	else {
 		ch_single_fastqs = Channel.fromPath("${params.fastq_dir}/*.fastq*")
 			.map { fastq -> tuple(file(fastq), file(fastq).countFastq()) }
-			.filter { it[0].name.contains('_R1') == false && it[0].name.contains('_R2') == false }
+			.filter { it[0].getBaseName().contains('_R1') == false && it[0].getBaseName().contains('_R2') == false }
 			.filter { it[1] >= 20 }
 			.map { fastq, _count -> tuple(file(fastq).getSimpleName(), "nanopore", file(fastq)) }
 		ch_paired_fastqs = Channel.fromFilePairs("${params.fastq_dir}/*_{1,2}.fastq.gz", flat: true)
@@ -115,5 +115,6 @@ workflow {
 		DOWNLOADS.out.sylph_dbs,
 		DOWNLOADS.out.sourmash_dbs,
 		DOWNLOADS.out.gottcha2_db,
+		DOWNLOADS.out.nvd_dbs,
 	)
 }

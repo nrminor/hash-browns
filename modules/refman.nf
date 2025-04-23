@@ -1,15 +1,15 @@
 process FETCH_SYLPH_DATABASES {
 
+    storeDir params.db_cache
+
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
-
-    storeDir params.db_cache
 
     input:
     path refman_registry
 
     output:
-    tuple val("sylph"), path("syldb.tar")
+    path "syldb.tar"
 
     when:
     (params.download || params.download_only) && params.sylph
@@ -22,16 +22,16 @@ process FETCH_SYLPH_DATABASES {
 
 process FETCH_SOURMASH_DATABASES {
 
+    storeDir params.db_cache
+
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
-
-    storeDir params.db_cache
 
     input:
     path refman_registry
 
     output:
-    tuple val("sourmash"), path("sourmash-bacterial-viral.tar")
+    path "sourmash-bacterial-viral.tar"
 
     when:
     (params.download || params.download_only) && params.sourmash
@@ -42,18 +42,19 @@ process FETCH_SOURMASH_DATABASES {
 	"""
 }
 
+
 process FETCH_GOTTCHA2_DATABASES {
+
+    storeDir params.db_cache
 
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
-
-    storeDir params.db_cache
 
     input:
     path refman_registry
 
     output:
-    tuple val("gottcha2"), path("gottcha-db.tar")
+    path "gottcha-db.tar"
 
     when:
     (params.download || params.download_only) && params.gottcha2
@@ -64,12 +65,32 @@ process FETCH_GOTTCHA2_DATABASES {
 	"""
 }
 
+process FETCH_NVD_DATABASES {
+
+    storeDir params.db_cache
+
+    errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
+    maxRetries 1
+
+    input:
+    path refman_registry
+
+    output:
+    path "gottcha-db.tar"
+
+    when:
+    (params.download || params.download_only) && params.gottcha2
+
+    script:
+    """
+    refman download nvd
+	"""
+}
+
 process EXTRACT_DB_FILES {
     tag "${tool}"
     errorStrategy { task.attempt < 2 ? 'retry' : 'ignore' }
     maxRetries 1
-
-    storeDir params.db_cache
 
     input:
     tuple val(tool), path(tar_archive)

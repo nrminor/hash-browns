@@ -2319,8 +2319,6 @@ packages:
   - perl-list-moreutils
   - rpsbproc
   - zlib
-  arch: x86_64
-  platform: linux
   license: NCBI-PD
   size: 148270198
   timestamp: 1743181320604
@@ -2342,8 +2340,6 @@ packages:
   - perl-list-moreutils
   - rpsbproc
   - zlib
-  arch: aarch64
-  platform: linux
   license: NCBI-PD
   size: 145178710
   timestamp: 1743180765609
@@ -2364,8 +2360,6 @@ packages:
   - perl-list-moreutils
   - rpsbproc
   - zlib
-  arch: x86_64
-  platform: osx
   license: NCBI-PD
   size: 168734931
   timestamp: 1743189752491
@@ -3313,8 +3307,6 @@ packages:
   md5: 0994f567f11543b7aea1afce884c2ce6
   depends:
   - wget
-  arch: x86_64
-  platform: linux
   license: PUBLIC DOMAIN
   purls: []
   size: 14686658
@@ -3324,8 +3316,6 @@ packages:
   md5: 289ba7576234e65af7824ef380db651a
   depends:
   - wget
-  arch: aarch64
-  platform: linux
   license: PUBLIC DOMAIN
   purls: []
   size: 13695014
@@ -3337,8 +3327,6 @@ packages:
   - wget
   constrains:
   - __osx>=10.12
-  arch: x86_64
-  platform: osx
   license: PUBLIC DOMAIN
   purls: []
   size: 14524020
@@ -4379,7 +4367,7 @@ packages:
 - pypi: .
   name: hash-browns
   version: 0.1.0
-  sha256: 88f78bfd94e4ebe8cd4e6840db0e664df4fd9c0334c1dbd6264fc7615f1235a0
+  sha256: bbda9313e5428d73af0d9db79aae1391855594ea90e70977f34c6c155e75a9d4
   requires_dist:
   - biopython>=1.85
   - loguru>=0.7.3
@@ -8272,8 +8260,6 @@ packages:
   depends:
   - libgcc >=13
   - libstdcxx >=13
-  arch: x86_64
-  platform: linux
   license: Public Domain
   purls: []
   size: 11067140
@@ -8284,8 +8270,6 @@ packages:
   depends:
   - libgcc >=13
   - libstdcxx >=13
-  arch: aarch64
-  platform: linux
   license: Public Domain
   purls: []
   size: 11408310
@@ -8295,8 +8279,6 @@ packages:
   md5: 9d002e46dd389ee463d90eb2848a5718
   depends:
   - libcxx >=18
-  arch: x86_64
-  platform: osx
   license: Public Domain
   purls: []
   size: 10025688
@@ -9045,8 +9027,6 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9058,8 +9038,6 @@ packages:
   depends:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9071,8 +9049,6 @@ packages:
   depends:
   - __osx >=10.13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9085,8 +9061,6 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9098,8 +9072,6 @@ packages:
   depends:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9111,8 +9083,6 @@ packages:
   depends:
   - __osx >=10.13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9128,8 +9098,6 @@ packages:
   - perl-exporter
   - perl-parent
   - perl-storable
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   purls: []
   size: 1731511
@@ -9143,8 +9111,6 @@ packages:
   - perl-exporter
   - perl-parent
   - perl-storable
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   purls: []
   size: 1744815
@@ -9158,8 +9124,6 @@ packages:
   - perl-exporter
   - perl-parent
   - perl-storable
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   purls: []
   size: 1051857
@@ -9205,8 +9169,6 @@ packages:
   - perl-compress-raw-zlib >=2.103
   - perl-encode
   - perl-scalar-list-utils
-  arch: x86_64
-  platform: linux
   license: perl_5
   purls: []
   size: 86778
@@ -9222,8 +9184,6 @@ packages:
   - perl-compress-raw-zlib >=2.103
   - perl-encode
   - perl-scalar-list-utils
-  arch: aarch64
-  platform: linux
   license: perl_5
   purls: []
   size: 86790
@@ -9238,8 +9198,6 @@ packages:
   - perl-compress-raw-zlib >=2.103
   - perl-encode
   - perl-scalar-list-utils
-  arch: x86_64
-  platform: osx
   license: perl_5
   purls: []
   size: 86867
@@ -9272,8 +9230,6 @@ packages:
   - perl >=5.32.1,<5.33.0a0 *_perl5
   - perl-common-sense
   - perl-types-serialiser
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   purls: []
   size: 74836
@@ -9287,8 +9243,6 @@ packages:
   - perl >=5.32.1,<5.33.0a0 *_perl5
   - perl-common-sense
   - perl-types-serialiser
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   purls: []
   size: 73567
@@ -9301,8 +9255,6 @@ packages:
   - perl >=5.32.1,<5.33.0a0 *_perl5
   - perl-common-sense
   - perl-types-serialiser
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   purls: []
   size: 73997
@@ -9324,8 +9276,6 @@ packages:
   depends:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: linux
   license: apache_2_0
   purls: []
   size: 51506
@@ -9336,8 +9286,6 @@ packages:
   depends:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: aarch64
-  platform: linux
   license: apache_2_0
   purls: []
   size: 51048
@@ -9347,8 +9295,6 @@ packages:
   md5: 2a311e115963e9a985b1029d092a58d1
   depends:
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: osx
   license: apache_2_0
   purls: []
   size: 44178
@@ -9371,8 +9317,6 @@ packages:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
   - perl-carp
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9385,8 +9329,6 @@ packages:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
   - perl-carp
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9399,8 +9341,6 @@ packages:
   - __osx >=10.13
   - perl >=5.32.1,<5.33.0a0 *_perl5
   - perl-carp
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9413,8 +9353,6 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9426,8 +9364,6 @@ packages:
   depends:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9439,8 +9375,6 @@ packages:
   depends:
   - __osx >=10.13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9453,8 +9387,6 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9466,8 +9398,6 @@ packages:
   depends:
   - libgcc >=13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: aarch64
-  platform: linux
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -9479,8 +9409,6 @@ packages:
   depends:
   - __osx >=10.13
   - perl >=5.32.1,<5.33.0a0 *_perl5
-  arch: x86_64
-  platform: osx
   license: GPL-1.0-or-later OR Artistic-1.0-Perl
   license_family: OTHER
   purls: []
@@ -10700,8 +10628,6 @@ packages:
   - libsqlite >=3.49.1,<4.0a0
   - libstdcxx >=13
   - libzlib >=1.3.1,<2.0a0
-  arch: x86_64
-  platform: linux
   license: Public Domain
   purls: []
   size: 6555182
@@ -10715,8 +10641,6 @@ packages:
   - libsqlite >=3.49.1,<4.0a0
   - libstdcxx >=13
   - libzlib >=1.3.1,<2.0a0
-  arch: aarch64
-  platform: linux
   license: Public Domain
   purls: []
   size: 6303855
@@ -10729,8 +10653,6 @@ packages:
   - libcxx >=18
   - libsqlite >=3.49.1,<4.0a0
   - libzlib >=1.3.1,<2.0a0
-  arch: x86_64
-  platform: osx
   license: Public Domain
   purls: []
   size: 4975729
